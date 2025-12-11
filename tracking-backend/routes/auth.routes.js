@@ -31,12 +31,12 @@ const saltRounds = 10;
     
     //1. Validate Input
     if(!email || !password || !name ){
-        return res.status(400).json({error: 'Name, email, and password are required.'});
+        return res.status(400).json({message: 'Name, email, and password are required.'});
 
     }
 
     if(!isValidEmail(email) || !isValidPassword(password)){
-        return res.status(400).json({error: 'Invalid email or password format.'});
+        return res.status(400).json({message: 'Invalid email or password format.'});
     }
 
 
@@ -62,10 +62,10 @@ const saltRounds = 10;
     }catch(error){
        
         if(error.code === 'ER_DUP_ENTRY'){
-            return res.status(409).json({error: 'Email already registered. '});
+            return res.status(409).json({message: 'Email already registered. '});
         }
         console.error('Registration error:', error);
-        res.status(500).json({error: 'Server error during regitration. '});
+        res.status(500).json({message: 'Server error during registration. '});
          
     }
 })
@@ -77,11 +77,11 @@ router.post('/login', async(req, res) => {
 
     //1. Validate Input
     if(!email || !password ){
-        return res.status(400).json({error: 'Email and Password are required or invalid. '});
+        return res.status(400).json({message: 'Email and Password are required or invalid. '});
     }
 
     if(!isValidEmail(email) || !isValidPassword(password)){
-        return res.status(400).json({error: 'Invalid email or password format.'});
+        return res.status(400).json({message: 'Invalid email or password format.'});
     }
 
     try{
@@ -90,13 +90,13 @@ router.post('/login', async(req, res) => {
         const user = rows[0];
 
         if(!user){
-            return res.status(401).json({error: 'Invalid email.'})
+            return res.status(401).json({message: 'Invalid email.'})
         }
 
         //2. Compare Passwords
         const isMatch = await bcrypt.compare(password, user.password_hash);
         if(!isMatch){
-            return res.status(401).json({error: 'Invalid password.'});
+            return res.status(401).json({message: 'Invalid password.'});
         }
 
         //3. Generate JWT Token

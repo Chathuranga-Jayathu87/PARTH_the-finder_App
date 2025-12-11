@@ -6,7 +6,7 @@
 // For iOS Simulator, use 'http://localhost' or 'http://127.0.0.1'.
 //const API_BASE_URL = 'http://10.0.2.2:3000/api/v1'; // Adjust if needed
 
-const API_BASE_URL = 'http:// 172.20.10.3:5000/api/auth'; // Adjust if needed
+const API_BASE_URL = 'http://172.20.10.3:5000/api/auth'; // Adjust if needed
 
 export const login = async (email, password) => {
     try {
@@ -30,6 +30,7 @@ export const login = async (email, password) => {
 
     } catch (error) {
         console.error('Error during login:', error.message);
+        console.log('API_BASE_URL:', API_BASE_URL);
         throw error;
     }
 };

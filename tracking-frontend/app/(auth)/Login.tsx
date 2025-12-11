@@ -20,10 +20,14 @@ export default function Login() {
             const response = await login(email, password);
             await AsyncStorage.setItem('token', response.token);
             Alert.alert("Success", "Logged in!");
+
+            router.replace('/(app)');// Navigate to main app layout
         } catch (err) {
             Alert.alert("Login Failed.", (err as Error).message);
-        }
+        } finally{
         setLoading(false);
+        }
+        
     };
 
     return (

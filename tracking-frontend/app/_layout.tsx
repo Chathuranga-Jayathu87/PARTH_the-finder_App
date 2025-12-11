@@ -1,4 +1,4 @@
-import { Stack } from 'expo-router';
+import { Stack} from 'expo-router';
 import React from 'react';
 
 // This is the global layout file for the entire app.
@@ -24,13 +24,30 @@ const RootLayout = () => {
       />
 
       {/* 4. The main application screen (Dashboard/Map) */}
-      <Stack.Screen 
+     {/* <Stack.Screen 
         name="dashboard" 
         options={{ title: 'Live Tracker' }} 
       />
+      */}
+
+ {/* 🚀 NEW: The main application group (which uses the Drawer/Sidebar layout) */}
+      <Stack.Screen 
+        name="(app)" // This points to the new app/(app)/_layout.js file
+        options={{ headerShown: false }} // The DrawerLayout will handle its own header
+      />
     </Stack>
+     
     
   );
 };
 
 export default RootLayout;
+
+
+
+
+
+
+
+
+
