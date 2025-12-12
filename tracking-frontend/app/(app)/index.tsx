@@ -14,47 +14,25 @@ export default function AppHome() {
       {/* 1. Header/Welcome Area */}
       <View style={styles.header}>
         <Text style={styles.welcomeText}>Welcome Back, User!</Text>
-        <Button 
-          title="Open Menu" 
-          onPress={() => navigation.openDrawer()} // Button to open the sidebar
-          color="#3f51b5"
-        />
       </View>
 
-      {/* 2. Main Map View Area (Placeholder for react-native-maps) */}
-      <View style={styles.mapContainer}>
-        <Text style={styles.mapPlaceholderText}>
-          
-          {/* This is where you will integrate react-native-maps 
-            to show real-time vehicle location.
-          */}
-          MAP VIEW LOADING...
-        </Text>
-        <Ionicons name="location-sharp" size={40} color="#FF3B30" style={{ marginTop: 10 }} />
-      </View>
+        <View style={styles.cardRow}>
+          <View style={styles.statusCard}>
+            <Ionicons name="add-sharp" size={30} color="#3f51b5" />
+            <Text style={styles.cardTitle}>Vehicle Registration</Text>
+          </View>
+        </View>
 
-      {/* 3. Status Cards / Summary */}
-      <View style={styles.cardRow}>
-        <View style={styles.statusCard}>
-          <Text style={styles.cardTitle}>Vehicle Status</Text>
-          <Text style={styles.cardValue}>ONLINE</Text>
+        <View style={styles.cardRow}>
+          <View style={styles.statusCard}>
+            <Ionicons name="car-sport-sharp" size={30} color="#3f51b5" />
+            <Text style={styles.cardTitle}>Assign Vehicle</Text>
+            <Text style={styles.cardValue}>PBX-1578</Text>
+            <Text style={styles.cardValue}>Toyota Hiace</Text>
+          </View>
         </View>
-        <View style={styles.statusCard}>
-          <Text style={styles.cardTitle}>Last Update</Text>
-          <Text style={styles.cardValue}>Just Now</Text>
-        </View>
-      </View>
-      <View style={styles.cardRow}>
-        <View style={styles.statusCard}>
-          <Text style={styles.cardTitle}>Alerts Today</Text>
-          <Text style={styles.cardValue}>3</Text>
-        </View>
-        <View style={styles.statusCard}>
-          <Text style={styles.cardTitle}>Distance Today</Text>
-          <Text style={styles.cardValue}>150 km</Text>
-        </View>
-      </View>
-      
+
+
     </ScrollView>
   );
 }
@@ -116,7 +94,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   cardValue: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#3f51b5',
   },
