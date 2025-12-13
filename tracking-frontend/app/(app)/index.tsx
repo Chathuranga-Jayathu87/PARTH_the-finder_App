@@ -1,8 +1,8 @@
 // app/(app)/index.js - The main Home Screen/Dashboard
 
 import React from 'react';
-import { View, Text, StyleSheet, Button, ScrollView } from 'react-native';
-import { useNavigation } from 'expo-router';
+import { View, Text, StyleSheet, Button, ScrollView, TouchableOpacity } from 'react-native';
+import { router, useNavigation } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function AppHome() {
@@ -17,19 +17,25 @@ export default function AppHome() {
       </View>
 
         <View style={styles.cardRow}>
-          <View style={styles.statusCard}>
+          <TouchableOpacity
+           style={styles.statusCard}
+           onPress={() => router.push('/(app)/register-vehicle')}  
+          >
             <Ionicons name="add-sharp" size={30} color="#3f51b5" />
             <Text style={styles.cardTitle}>Vehicle Registration</Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.cardRow}>
-          <View style={styles.statusCard}>
+          <TouchableOpacity
+           style={styles.statusCard}
+           onPress={()=> router.push('/(app)/vehicle/[id]')}
+           >
             <Ionicons name="car-sport-sharp" size={30} color="#3f51b5" />
             <Text style={styles.cardTitle}>Assign Vehicle</Text>
             <Text style={styles.cardValue}>PBX-1578</Text>
             <Text style={styles.cardValue}>Toyota Hiace</Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
 

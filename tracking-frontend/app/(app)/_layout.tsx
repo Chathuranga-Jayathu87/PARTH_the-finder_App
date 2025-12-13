@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import CustomDrawerContent from '../../components/CustomDrawerContent'; // We'll create this next
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { ParamListBase } from '@react-navigation/native';
+import { router } from 'expo-router';
 
 type SidebarButtonProps = {
   navigation: DrawerNavigationProp<ParamListBase>;
@@ -33,9 +34,6 @@ const SidebarButton = ({ navigation }: SidebarButtonProps) =>(
 );
 
 
-
-
-
 export default function DrawerLayout() {
   return (
     <Drawer 
@@ -46,9 +44,7 @@ export default function DrawerLayout() {
       // Use the custom content component for the full sidebar UI
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
-      {/* This screen is the default route when navigating to '/(app)' 
-        It will be your main map/dashboard.
-      */}
+      
       <Drawer.Screen
         name="index" // Corresponds to app/(app)/index.js
         options={({ navigation }) => ({
@@ -166,6 +162,59 @@ export default function DrawerLayout() {
             <Ionicons name="notifications" size={size} color={color} />
           ),
         })} 
+      />
+
+
+      {/*Non display in drawer screen- vehicle-registartion */}
+      <Drawer.Screen
+      name="register-vehicle"
+      options={{
+        title: 'Vehicle Registartion',
+        headerStyle: {height:120},
+        headerLeft: () => (
+        <TouchableOpacity style={{marginLeft:15}} onPress={() => router.replace("/(app)")}>
+          <View
+                style={{
+                  width: 45,
+                  height: 45,
+                  borderRadius: 20,
+                  backgroundColor: '#e0e0e0',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+          <Ionicons name="chevron-back" size={24} />
+          </View>
+        </TouchableOpacity>
+        ),
+        drawerItemStyle: {display:'none'},
+      }}
+      />
+    
+
+      <Drawer.Screen
+      name="vehicle/[id]"
+      options={{
+        title: 'Vehicle Details',
+        headerStyle: {height:120},
+        headerLeft: () => (
+        <TouchableOpacity style={{marginLeft:15}} onPress={() => router.replace("/(app)")}>
+          <View
+                style={{
+                  width: 45,
+                  height: 45,
+                  borderRadius: 20,
+                  backgroundColor: '#e0e0e0',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+          <Ionicons name="chevron-back" size={24} />
+          </View>
+        </TouchableOpacity>
+        ),
+        drawerItemStyle:{display:'none'},
+      }}
       />
     </Drawer>
   );
