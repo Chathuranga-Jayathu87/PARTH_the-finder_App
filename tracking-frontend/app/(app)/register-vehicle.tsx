@@ -4,12 +4,14 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 // Assume you have an API service to register devices
-// import { registerDevice } from '../../src/services/deviceService'; 
+import { registerVehicle } from '../../src/services/vehicleService'; 
+
 
 export default function RegisterVehicleScreen() {
     const [plate, setPlate] = useState('');
     const [model, setModel] = useState('');
     const [trackerId, setTrackerId] = useState(''); // The unique ID from the physical GPS device
+    const [sim_number, setSimnumber] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleRegister = async () => {
@@ -18,17 +20,25 @@ export default function RegisterVehicleScreen() {
             return;
         }
 
+        const vehicledata = {
+            license_plate : plate,
+            imei_number : trackerId,
+            make_model : model,
+            sim_number : String(sim_number),
+
+        };
+
         setLoading(true);
         try {
             // 🚀 Call your backend API here
-            // const response = await registerDevice(plate, model, trackerId);
+             await registerVehicle(vehicledata);
             
             Alert.alert("Success", `Vehicle ${plate} registered successfully!`);
             // Go back to the dashboard after successful registration
             router.replace('/(app)'); 
             
         } catch (error) {
-            Alert.alert("Registration Failed", (error.message || 'Could not connect to service.'));
+            Alert.alert("Registration Failed", ((error instanceof Error ? error.message : String(error)) || 'Could not connect to service.'));
         } finally {
             setLoading(false);
         }
@@ -53,7 +63,7 @@ export default function RegisterVehicleScreen() {
                 placeholder="License Plate (e.g., PBX-1578)"
                 placeholderTextColor="#888"
                 value={plate}
-                onChangeText={setPlate}
+                onChangeText={setPlate} 
             />
             
             <TextInput
@@ -66,22 +76,34 @@ export default function RegisterVehicleScreen() {
             
             <TextInput
                 style={styles.input}
-                placeholder="GPS Tracker ID (Unique Device ID)"
+                placeholder="GPS Tracker IMEI (Unique Device ID)"
                 placeholderTextColor="#888"
                 value={trackerId}
                 onChangeText={setTrackerId}
             />
 
+            <TextInput
+                
+                style={styles.input}
+                placeholder="SIM Number (e.g., 0771234567)"
+                placeholderTextColor="#888"
+                value={sim_number}
+                keyboardType="numeric"
+                onChangeText={setSimnumber}
+            />
+
+            <Button title={loading ? "Registering..." : "Register Vehicle"} onPress={handleRegister} disabled={loading} />
+
             <View style={{ marginTop: 15 }}>
                 <Button 
-                    title="Cancel / Go Back" 
+                    title="Cancel" 
                     onPress={handleCancel} 
                     color="#FF3B30" // Use a distinct color for contrast
                     disabled={loading}
                 />
             </View>
             
-            <Button title={loading ? "Registering..." : "Register Vehicle"} onPress={handleRegister} disabled={loading} />
+           
             {loading && <ActivityIndicator style={{ marginTop: 15 }} size="small" />}
         </ScrollView>
     );

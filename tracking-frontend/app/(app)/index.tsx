@@ -112,11 +112,11 @@
 // app/(app)/index.tsx - The main Home Screen/Dashboard
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { router, useNavigation } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 // NOTE: You will need to create this service file later to talk to your Node.js API
-// import { getRegisteredVehicles } from '../../src/services/dataService'; 
+ import { getRegisteredVehicles } from '../../src/services/dataService'; 
 
 // --- TYPE DEFINITIONS ---
 interface Vehicle {
@@ -142,14 +142,23 @@ export default function AppHome() {
         const loadVehicles = async () => {
             setLoading(true);
             try {
-                // ⚠️ REPLACE this with your actual API call that fetches vehicles registered to the user
-                // const userVehicles = await getRegisteredVehicles(); 
+                // Call to the API to get registerd vehicles
+                const userVehicles = await getRegisteredVehicles(); 
                 
                 // For now, use the mock data
                 setVehicles(mockVehicles);
+                setVehicles(userVehicles);
             } catch (error) {
                 console.error("Failed to load user vehicles:", error);
                 // Handle error state gracefully (e.g., set an error message)
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                if(errorMessage.includes('Authentication required')){
+                    Alert.alert('Session Expired','Please Login Again', [
+                        { text: 'OK', onPress: () => router.replace('/(auth)/Login') }
+                    ]);
+                }else{
+                    Alert.alert('Data Error', 'Could not load Data from the Server');
+                }
             } finally {
                 setLoading(false);
             }

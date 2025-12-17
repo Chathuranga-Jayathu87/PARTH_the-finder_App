@@ -88,43 +88,90 @@ router.post('/register', async(req, res) => {
     }
 
 
-try{
-    //Normalize inputs
-    const normalizedPlate = license_plate.toUpperCase().trim();
-    const normalizedIMEI = imei_number.trim();
-    const normalizedMakeModel = make_model ? make_model.trim() : null;
-    const normalizedSIM = sim_number ? sim_number.trim() : null;
+// try{
+//     //Normalize inputs
+//     const normalizedPlate = license_plate.toUpperCase().trim();
+//     const normalizedIMEI = imei_number.trim();
+//     const normalizedMakeModel = make_model ? make_model.trim() : null;
+//     const normalizedSIM = sim_number ? String(sim_number).trim() : null;
 
-    //check if IMEI already exists
-    const [existingIMEI] = await db.query('SELECT vehicle_id FROM vehicles WHERE imei_number = ?',[normalizedIMEI]);
+//     //check if IMEI already exists
+//     const [existingIMEI] = await db.query('SELECT vehicle_id FROM vehicles WHERE imei_number = ?',[normalizedIMEI]);
 
-    if(existingIMEI.length > 0){
-        return res.status(409).json({error: 'This IMEI number is Allready Exista.'});
+//     if(existingIMEI.length > 0){
+//         return res.status(409).json({error: 'This IMEI number is Allready Exista.'});
+//     }
+
+//     //Check if License plate is Already exists
+//     // const [existplate] = await db.query('SELECT vehicle_id FROM vehicles WHERE license_palete = ?',[normalizedPlate]);
+
+//     // if(existingIMEI.length > 0){
+//     //     return res.status(409).json({error: 'This License plate is Allready Exista.'});
+//     // }
+
+
+//     //Insert new vehicle into the database
+//     const insertQuery = `INSERT INTO vehicles (user_id, imei_number, license_plate, make_model, sim_number, created_at)
+//     VALUES (?, ?, ?, ?, ?, NOW())`;
+
+//     const [result] = await db.query(insertQuery, [user_id, normalizedIMEI, normalizedPlate, normalizedMakeModel, normalizedSIM]);
+
+//     res.status(201).json({message: 'Vehicle registered successfully.',
+//         vehicle_id: result.insertId,
+//         data: {
+//         license_plate: normalizedPlate,
+//         imei_number: normalizedIMEI,
+//         make_model: normalizedMakeModel,
+//         sim_number: normalizedSIM
+//         }
+// });
+
+try {
+    // ✅ Safely normalize by converting to String first to avoid .trim() crashes
+    const normalizedPlate = String(license_plate || '').toUpperCase().trim();
+    const normalizedIMEI = String(imei_number || '').trim();
+    const normalizedMakeModel = make_model ? String(make_model).trim() : null;
+    
+    // Check if it's a number/string, then stringify it before trimming
+    const normalizedSIM = sim_number ? String(sim_number).trim() : null;
+
+    // 1. check if IMEI already exists
+    const [existingIMEI] = await db.query(
+        'SELECT vehicle_id FROM vehicles WHERE imei_number = ?',
+        [normalizedIMEI]
+    );
+
+    if (existingIMEI.length > 0) {
+        return res.status(409).json({ error: 'This IMEI number is already registered.' });
     }
 
-    //Check if License plate is Already exists
-    // const [existplate] = await db.query('SELECT vehicle_id FROM vehicles WHERE license_palete = ?',[normalizedPlate]);
+    // 2. Insert new vehicle
+    const insertQuery = `
+        INSERT INTO vehicles (user_id, imei_number, license_plate, make_model, sim_number, created_at)
+        VALUES (?, ?, ?, ?, ?, NOW())
+    `;
 
-    // if(existingIMEI.length > 0){
-    //     return res.status(409).json({error: 'This License plate is Allready Exista.'});
-    // }
+    const [result] = await db.query(insertQuery, [
+        user_id, 
+        normalizedIMEI, 
+        normalizedPlate, 
+        normalizedMakeModel, 
+        normalizedSIM
+    ]);
 
-
-    //Insert new vehicle into the database
-    const insertQuery = `INSERT INTO vehicles (user_id, imei_number, license_plate, make_model, sim_number, created_at)
-    VALUES (?, ?, ?, ?, ?, NOW())`;
-
-    const [result] = await db.query(insertQuery, [user_id, normalizedIMEI, normalizedPlate, normalizedMakeModel, normalizedSIM]);
-
-    res.status(201).json({message: 'Vehicle registered successfully.',
+    res.status(201).json({
+        message: 'Vehicle registered successfully.',
         vehicle_id: result.insertId,
         data: {
-        license_plate: normalizedPlate,
-        imei_number: normalizedIMEI,
-        make_model: normalizedMakeModel,
-        sim_number: normalizedSIM
+            license_plate: normalizedPlate,
+            imei_number: normalizedIMEI,
+            make_model: normalizedMakeModel,
+            sim_number: normalizedSIM
         }
-});
+    });
+
+
+
 
 }catch (error){
     if(error.code === 'ER_DUP_ENTRY'){

@@ -109,7 +109,7 @@ export const clearAuthToken = async () => {
 // -------------------------------------------------------------
 export const login = async (email, password) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/login`, {
+        const response = await fetch(`${API_BASE_URL}/login`, {  //http://172.20.10.3:5000/api/auth/login
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -144,7 +144,7 @@ export const login = async (email, password) => {
 // -------------------------------------------------------------
 export const register = async (name, email, password, phone) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/register`, {
+        const response = await fetch(`${API_BASE_URL}/register`, {  //http://172.20.10.3:5000/api/auth/register
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -1,0 +1,67 @@
+import { getAuthToken } from './authService';
+
+const API_BASE_URL = 'http://172.20.10.3:5000/api/vehicles'; // Use your specific API base
+
+// export const registerVehicle = async (vehicleData) => {
+//     try {
+//         const token = await getAuthToken();
+//         console.log(token);
+//         console.log(vehicleData);
+//         const response = await fetch(`${API_BASE_URL}/vehicles/register`, {   //http://172.20.10.3:5000/api/vehicles/register
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//                 'Authorization': `Bearer ${token}`,
+//             },
+//             body: JSON.stringify(vehicleData),
+//         });
+
+//         const data = await response.json();
+
+//         if (!response.ok) {
+//             throw new Error(data.message || 'Failed to register vehicle');
+//         }
+
+//         return data;
+//     } catch (error) {
+//         console.error('Vehicle Registration Error:', error.message);
+//         throw error;
+//     }
+// };
+
+
+export const registerVehicle = async (vehicleData) => {
+    try {
+        const token = await getAuthToken();
+        const response = await fetch(`${API_BASE_URL}/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(vehicleData),
+        });
+
+        // 1. Check if the response is actually JSON before parsing
+        const contentType = response.headers.get("content-type");
+        
+        if (!response.ok) {
+            // If the server sent an error, try to get the JSON error message
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Server error occurred');
+            } else {
+                // If the server sent HTML (the "<" error), get the text instead
+                const errorText = await response.text();
+                console.error("Server returned HTML instead of JSON:", errorText);
+                throw new Error('Server crashed or route not found (404)');
+            }
+        }
+
+        return await response.json();
+
+    } catch (error) {
+        console.error("Network or App Error:", error.message);
+        throw error;
+    }
+};

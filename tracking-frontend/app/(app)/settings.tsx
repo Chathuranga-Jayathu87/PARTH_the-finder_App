@@ -3,9 +3,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-// You'll use AsyncStorage here for operations like clearing the token on logout
-// import AsyncStorage from '@react-native-async-storage/async-storage'; 
-// import { router } from 'expo-router'; 
+import { clearAuthToken } from '@/src/services/authService'; 
+import { router } from 'expo-router'; 
 
 // --- SECTION DATA ---
 const userSettings = [
@@ -56,10 +55,10 @@ const SettingsSection: React.FC<SettingsSectionProps> = ({ title, data }) => (
 export default function SettingsScreen() {
     
     // In a final app, the main Logout logic from CustomDrawerContent.js would be repeated here or called via context
-    // const handleLogout = async () => {
-    //     await AsyncStorage.removeItem('token'); 
-    //     router.replace('/(auth)/Login');
-    // };
+     const handleLogout = async () => {
+         await clearAuthToken();
+         router.replace('/(auth)/Login');
+     };
 
     return (
         <ScrollView style={styles.container}>
@@ -68,9 +67,22 @@ export default function SettingsScreen() {
             <SettingsSection title="Legal & About" data={aboutItems} />
             
             {/* ⚠️ Logout Button can be added here as a separate, clearly styled button */}
-            <TouchableOpacity style={styles.logoutButton} onPress={() => Alert.alert('Logout', 'Are you sure you want to log out?')} >
-                <Text style={styles.logoutText}>Log Out</Text>
-            </TouchableOpacity>
+            
+            <TouchableOpacity 
+  style={styles.logoutButton} 
+  onPress={() => 
+    Alert.alert(
+      'Logout', 
+      'Are you sure you want to log out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Log Out', onPress: () => handleLogout(), style: 'destructive' }
+      ]
+    )
+  } 
+>
+  <Text style={styles.logoutText}>Log Out</Text>
+</TouchableOpacity>
 
             <Text style={styles.versionText}>App Version 1.0.0</Text>
         </ScrollView>

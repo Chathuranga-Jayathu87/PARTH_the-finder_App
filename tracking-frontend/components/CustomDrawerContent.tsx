@@ -4,15 +4,16 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
+import { clearAuthToken } from '@/src/services/authService';
+
 
 
 
 export default function CustomDrawerContent(props:any) {
   
-  const handleLogout = () => {
+  const handleLogout = async () => {
     // 1. Clear AsyncStorage (token)
-    // AsyncStorage.removeItem('token'); 
-    
+    await clearAuthToken();
     // 2. Redirect to the login screen
     router.replace('/(auth)/Login');
   };
