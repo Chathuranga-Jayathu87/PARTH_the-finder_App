@@ -87,45 +87,6 @@ router.post('/register', async(req, res) => {
         return res.status(400).json({error: validation.errors[0],errors: validation.errors});
     }
 
-
-// try{
-//     //Normalize inputs
-//     const normalizedPlate = license_plate.toUpperCase().trim();
-//     const normalizedIMEI = imei_number.trim();
-//     const normalizedMakeModel = make_model ? make_model.trim() : null;
-//     const normalizedSIM = sim_number ? String(sim_number).trim() : null;
-
-//     //check if IMEI already exists
-//     const [existingIMEI] = await db.query('SELECT vehicle_id FROM vehicles WHERE imei_number = ?',[normalizedIMEI]);
-
-//     if(existingIMEI.length > 0){
-//         return res.status(409).json({error: 'This IMEI number is Allready Exista.'});
-//     }
-
-//     //Check if License plate is Already exists
-//     // const [existplate] = await db.query('SELECT vehicle_id FROM vehicles WHERE license_palete = ?',[normalizedPlate]);
-
-//     // if(existingIMEI.length > 0){
-//     //     return res.status(409).json({error: 'This License plate is Allready Exista.'});
-//     // }
-
-
-//     //Insert new vehicle into the database
-//     const insertQuery = `INSERT INTO vehicles (user_id, imei_number, license_plate, make_model, sim_number, created_at)
-//     VALUES (?, ?, ?, ?, ?, NOW())`;
-
-//     const [result] = await db.query(insertQuery, [user_id, normalizedIMEI, normalizedPlate, normalizedMakeModel, normalizedSIM]);
-
-//     res.status(201).json({message: 'Vehicle registered successfully.',
-//         vehicle_id: result.insertId,
-//         data: {
-//         license_plate: normalizedPlate,
-//         imei_number: normalizedIMEI,
-//         make_model: normalizedMakeModel,
-//         sim_number: normalizedSIM
-//         }
-// });
-
 try {
     // ✅ Safely normalize by converting to String first to avoid .trim() crashes
     const normalizedPlate = String(license_plate || '').toUpperCase().trim();

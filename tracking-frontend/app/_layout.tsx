@@ -23,12 +23,7 @@ const RootLayout = () => {
         options={{ headerShown: true , title: 'Register' }} 
       />
 
-      {/* 4. The main application screen (Dashboard/Map) */}
-     {/* <Stack.Screen 
-        name="dashboard" 
-        options={{ title: 'Live Tracker' }} 
-      />
-      */}
+      
 
  {/* 🚀 NEW: The main application group (which uses the Drawer/Sidebar layout) */}
       <Stack.Screen 

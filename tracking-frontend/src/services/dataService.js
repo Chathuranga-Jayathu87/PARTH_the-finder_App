@@ -7,6 +7,7 @@ const API_BASE_URL = 'http://172.20.10.3:5000/api/v1'; // Assuming a common data
 // --- Helper function to prepare authenticated fetch headers ---
 const getSecuredHeaders = async () => {
     const token = await getAuthToken();
+    //console.log(token);
     if (!token) {
         throw new Error('Authentication required. Please log in.');
     }
@@ -20,14 +21,17 @@ const getSecuredHeaders = async () => {
 export const getRegisteredVehicles = async () => {
     try {
         const headers = await getSecuredHeaders();
-        
+        console.log(headers);
         // This endpoint will query the 'vehicles' table WHERE user_id = LOGGED_IN_USER_ID
-        const response = await fetch(`${API_BASE_URL}/vehicles`, {
+        const response = await fetch(`${API_BASE_URL}/vehicles`, {    //http://172.20.10.3:5000/api/v1/vehicles
             method: 'GET',
             headers: headers,
         });
 
         const data = await response.json();
+        console.log("Status:",response.status);
+        console.log(data);
+
 
         if (!response.ok) {
             // Handle specific errors like token expired (401) or resource not found
