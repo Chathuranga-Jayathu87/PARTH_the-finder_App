@@ -24,7 +24,7 @@ router.get('/vehicles', async (req, res) => {
                 vehicles: []
             });
         }
-console.log(res);
+//console.log(res);
         res.status(200).json({
             success: true,
             vehicles: results

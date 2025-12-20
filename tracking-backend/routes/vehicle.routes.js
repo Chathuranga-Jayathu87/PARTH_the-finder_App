@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
 const authMiddleware = require('../middleware/auth.middleware');
+const  vehicleController = require('../controllers/vehicle.controller');
 
 //Apply the middleware to all routes in this router.
 //This means that all vehicle routes will require authentication.
@@ -145,4 +146,7 @@ try {
 }
     
 });
+//get the vehicle information to the header of the each vehicle and also history
+router.get("/:id",vehicleController.getVehicleById);
+
 module.exports = router;

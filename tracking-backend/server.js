@@ -22,7 +22,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // API Routes
 app.use('/api/auth', authRoutes); // come to this point http://172.20.10.3:5000/api/auth/login  //http://172.20.10.3:5000/api/auth/register
-app.use('/api/vehicles', vehicleRoutes);  //http://172.20.10.3:5000/api/vehicle/register
+app.use('/api/vehicles', vehicleRoutes);  //http://172.20.10.3:5000/api/vehicles/register      http://172.20.10.3:5000/api/vehicles/id   
 app.use('/api/v1',registerdVehicles);     //http://172.20.10.3:5000/api/v1/vehicles
 
 // Test route
