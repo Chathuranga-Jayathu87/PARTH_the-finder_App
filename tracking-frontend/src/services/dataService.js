@@ -48,6 +48,29 @@ export const getRegisteredVehicles = async () => {
 };
 
 // 🚀 2. Fetch Alerts (Placeholder for future use)
-export const getAlerts = async (page = 1) => {
-    // ... logic to fetch from /api/v1/alerts ...
+// 🚀 Fetch historical alerts for the logged-in user
+export const getAlerts = async () => {
+    try {
+        const headers = await getSecuredHeaders();
+        const response = await fetch(`${API_BASE_URL}/alerts`, {
+            method: 'GET',
+            headers: headers,
+        });
+
+        const data = await response.json();
+          console.log("Status:",response.status);
+        console.log(data);
+
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to fetch alerts.');
+        }
+
+        // Returns an array of alerts
+        return data.alerts || []; 
+
+    } catch (error) {
+        console.error('Error fetching alerts:', error.message);
+        throw error;
+    }
 };
