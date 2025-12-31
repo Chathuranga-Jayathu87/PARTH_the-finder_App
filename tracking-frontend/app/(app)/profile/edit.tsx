@@ -1,16 +1,42 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
+import { updateProfile,getProfile } from '@/src/services/userService';
+
 
 export default function EditProfileScreen() {
     // These would ideally be initialized with data from your Auth Context or API
-    const [name, setName] = useState('John Doe');
-    const [email, setEmail] = useState('john.doe@example.com');
-    const [phone, setPhone] = useState('+1 234 567 890');
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
     const [image, setImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+
+    //1.Fetch data on component mount 
+    useEffect(() => {
+        loadUserdata();
+    }, []);
+
+    const loadUserdata = async () => {
+        try {
+            const response = await getProfile();
+            if (response.success) {
+                const user = response.user;
+                setName(user.name || '');
+                setEmail(user.email || '');
+                setPhone(user.phone_number || '');
+                if (user.profile_image) {
+                    const fullImageUrl = `http://172.20.10.3:5000${user.profile_image}`;
+                    setImage(fullImageUrl);
+                }
+            }
+        } catch (error) {   
+            Alert.alert("Error", "Failed to load user data.");
+        }
+
+    };
 
     // Function to handle image selection
     const pickImage = async () => {
@@ -22,37 +48,38 @@ export default function EditProfileScreen() {
         }
         // Launch image picker
         const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+           mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
-            aspect: [1, 1],
+            aspect: [1, 0.75],
             quality: 1,
         });
 
         if (!result.canceled) {
+            console.log("Selected image URI:", result.assets[0].uri);
             setImage(result.assets[0].uri);
         }
     };
 
-
-
-    // const handleSave = () => {
-    //     // Logic to update profile via your authService or API
-    //     Alert.alert("Success", "Profile updated successfully!", [
-    //         { text: "OK", onPress: () => router.back() }
-    //     ]);
-    // };
-
-
+    // // Function to handle profile update
 
     const handleSave = async () => {
         setLoading(true);
-        // Simulate API Call
-        setTimeout(() => {
-            setLoading(false);
-            Alert.alert("Success", "Profile updated successfully!", [
-                { text: "OK", onPress: () => router.back() }
-            ]);
-        }, 1500);
+        try {
+            
+            const response = await updateProfile( name, email, phone, image);
+
+            if (response.success) {
+                Alert.alert("Success", "Profile updated successfully!", [
+                    { text: "OK", onPress: () => router.back() }
+                ]);
+            } else {
+                Alert.alert("Error", response.error || "Update failed.");
+            }
+        } catch (error) {
+            Alert.alert("Connection Error", "Ensure your backend server is running.");
+        } finally {
+             setLoading(false);
+        }
     };
 
     return (
@@ -62,7 +89,7 @@ export default function EditProfileScreen() {
             <View style={styles.avatarContainer}>
                 <View style={styles.imageWrapper}>
                     <Image 
-                        source={{ uri: 'https://via.placeholder.com/150' }} 
+                        source={{ uri: image ? image : 'https://via.placeholder.com/150' }} 
                         style={styles.avatar} 
                     />
                     <TouchableOpacity style={styles.editBadge} onPress={pickImage}>
