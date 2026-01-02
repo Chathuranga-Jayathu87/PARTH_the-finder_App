@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image, Alert, ActivityIndicator, DeviceEventEmitter } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { updateProfile,getProfile } from '@/src/services/userService';
+import { useUser } from '@/src/context/UserContext';
 
 
 export default function EditProfileScreen() {
@@ -13,6 +14,8 @@ export default function EditProfileScreen() {
     const [phone, setPhone] = useState('');
     const [image, setImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+
+    const { refreshUser } = useUser();
 
     //1.Fetch data on component mount 
     useEffect(() => {
@@ -72,6 +75,7 @@ export default function EditProfileScreen() {
                 Alert.alert("Success", "Profile updated successfully!", [
                     { text: "OK", onPress: () => router.back() }
                 ]);
+                await refreshUser();
             } else {
                 Alert.alert("Error", response.error || "Update failed.");
             }
@@ -80,6 +84,10 @@ export default function EditProfileScreen() {
         } finally {
              setLoading(false);
         }
+
+        //DeviceEventEmitter.emit('profileUpdated'); 
+  //Alert.alert("Success", "Profile updated!");
+
     };
 
     return (

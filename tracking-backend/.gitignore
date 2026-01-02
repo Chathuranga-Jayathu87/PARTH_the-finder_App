@@ -1,2 +1,6 @@
 # local env files
 .env*.local
+#image files
+*.png
+*.jpg
+*.jpeg

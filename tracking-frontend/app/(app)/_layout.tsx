@@ -7,6 +7,7 @@ import CustomDrawerContent from '../../components/CustomDrawerContent'; // We'll
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { ParamListBase } from '@react-navigation/native';
 import { router } from 'expo-router';
+import { UserProvider } from '../../src/context/UserContext';
 
 type SidebarButtonProps = {
   navigation: DrawerNavigationProp<ParamListBase>;
@@ -36,6 +37,7 @@ const SidebarButton = ({ navigation }: SidebarButtonProps) =>(
 
 export default function DrawerLayout() {
   return (
+  <UserProvider>
     <Drawer 
       screenOptions={{
         headerTintColor: '#3f51b5', // Color of header text/icons
@@ -243,6 +245,34 @@ export default function DrawerLayout() {
       }}
       />
 
+
+      <Drawer.Screen
+      name="settings/change-password"
+      options={{
+        title: 'Change Password',
+        headerStyle: {height:120},
+        headerLeft: () => (
+        <TouchableOpacity style={{marginLeft:15}} onPress={() => router.replace("/(app)/settings")}>
+          <View
+                style={{
+                  width: 45,
+                  height: 45,
+                  borderRadius: 20,
+                  backgroundColor: '#e0e0e0',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+          <Ionicons name="chevron-back" size={24} />
+          </View>
+        </TouchableOpacity>
+        ),
+        drawerItemStyle:{display:'none'},
+      }}
+      />
+
+
     </Drawer>
+ </UserProvider>
   );
 }

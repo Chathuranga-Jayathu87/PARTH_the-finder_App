@@ -10,7 +10,7 @@ import { router } from 'expo-router';
 // --- SECTION DATA ---
 const userSettings = [
     { id: '1', title: 'Update Profile', icon: 'person-outline', action: () => router.push('/(app)/profile/edit')},
-    { id: '2', title: 'Change Password', icon: 'lock-closed-outline', action: () => router.push('/(auth)/frogot-password')},
+    { id: '2', title: 'Change Password', icon: 'lock-closed-outline', action: () => router.push('/(app)/settings/change-password') },
     { id: '3', title: 'Two-Factor Authentication', icon: 'shield-checkmark-outline', action: () => Alert.alert('Security', 'Navigate to 2FA Setup') },
 ];
 
