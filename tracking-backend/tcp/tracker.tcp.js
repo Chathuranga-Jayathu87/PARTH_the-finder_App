@@ -3,6 +3,7 @@ require('dotenv').config();
 const net = require('net');
 const db = require('../config/db');
 const { emitLiveUpdate, emitAlert } = require('../socket.manager');
+const { processAlert } = require('../services/alertProcessor');
 
 const TCP_PORT = process.env.TCP_PORT || 5000;
 const CONNECTION_TIMEOUT = 120000; // 2 minutes
@@ -777,23 +778,26 @@ async function handleAlarmPacket(socket, state, packet) {
     if (!state.isAuthenticated) return;
 
     try {
+
         const alarmType = parseAlarmType(packet);
         const gpsData = parseGpsData(packet, state.imei);
 
         // Store alarm with GPS data if available
-        await db.query(
-            `INSERT INTO alerts 
-             (vehicle_id, user_id, alert_type, message, lat, lng, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, NOW())`,
-            [
-                state.vehicleId,
-                state.userId,
-                alarmType,
-                `Alarm: ${alarmType}`,
-                gpsData?.latitude || null,
-                gpsData?.longitude || null
-            ]
-        );
+        await processAlert(state.userId, state.vehicleId, alarmType);
+        // await db.query(
+        //     `INSERT INTO alerts 
+        //      (vehicle_id, user_id, alert_type, message, lat, lng, created_at)
+        //      VALUES (?, ?, ?, ?, ?, ?, NOW())`,
+        //     [
+        //         state.vehicleId,
+        //         state.userId,
+        //         alarmType,
+        //         `Alarm: ${alarmType}`,
+        //         gpsData?.latitude || null,
+        //         gpsData?.longitude || null
+        //     ]
+        // );
+
 
         console.log(`[TCP] Alarm: ${state.imei} | Type: ${alarmType}`);
         sendResponse(socket, 'ACK');

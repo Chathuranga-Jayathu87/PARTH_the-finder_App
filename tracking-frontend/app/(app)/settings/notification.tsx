@@ -24,10 +24,12 @@ const PreferenceItem = ({ icon, title, description, value, onToggle, color = "#3
 export default function NotificationPreferences() {
     const [loading, setLoading] = useState(true);
     const [settings, setSettings] = useState({
-        speed_alerts: false,
+        overspeed_alerts: false,
         geofence_alerts: false,
         low_battery_alerts: false,
-        power_cut_alerts: false
+        power_cut_alerts: false,
+        sos_alerts: false,
+        vibration_alerts: false,
     });
 
     useEffect(() => {
@@ -35,22 +37,29 @@ export default function NotificationPreferences() {
     }, []);
 
     const loadSettings = async () => {
-        try {
-            const res = await getNotificationSettings();
-            if (res.success && res.settings) {
-                setSettings({
-                    speed_alerts: !!res.settings.speed_alerts,
-                    geofence_alerts: !!res.settings.geofence_alerts,
-                    low_battery_alerts: !!res.settings.low_battery_alerts,
-                    power_cut_alerts: !!res.settings.power_cut_alerts,
-                });
-            }
-        } catch (error) {
-            console.log(error);
-        } finally {
-            setLoading(false);
+    try {
+        const res = await getNotificationSettings();
+        console.log("Notification settings response:", res);
+
+        if (res.success && res.settings) {
+            setSettings({
+                overspeed_alerts: !!res.settings.speed_alerts,
+                geofence_alerts: !!res.settings.geofence_alerts,
+                low_battery_alerts: !!res.settings.low_battery_alerts,
+                power_cut_alerts: !!res.settings.power_cut_alerts,
+                sos_alerts: !!res.settings.sos_alerts,
+                vibration_alerts: !!res.settings.vibration_alerts,
+            });
+        } else {
+            throw new Error("Invalid response structure");
         }
-    };
+    } catch (error) {
+        console.log("Load settings error:", error);
+        Alert.alert("Error", "Failed to load notification settings.");
+    } finally {
+        setLoading(false);
+    }
+};
 
     const handleToggle = async (key: string, currentValue: boolean) => {
         const newValue = !currentValue;
@@ -77,8 +86,8 @@ export default function NotificationPreferences() {
                     icon="speedometer-outline"
                     title="Speeding Alerts"
                     description="Notify when vehicle exceeds limit"
-                    value={settings.speed_alerts}
-                    onToggle={() => handleToggle('speed_alerts', settings.speed_alerts)}
+                    value={settings.overspeed_alerts}
+                    onToggle={() => handleToggle('overspeed_alerts', settings.overspeed_alerts)}
                 />
                 <PreferenceItem 
                     icon="map-outline"
@@ -99,7 +108,29 @@ export default function NotificationPreferences() {
                     color="#FF9500"
                     onToggle={() => handleToggle('low_battery_alerts', settings.low_battery_alerts)}
                 />
+               
                 <PreferenceItem 
+                    icon="pulse-outline"
+                    title="Vibration Alerts"
+                    description="Alert when device is shaken or moved"
+                    value={settings.vibration_alerts}
+                    color="#FF9500"
+                    onToggle={() => handleToggle('vibration_alerts', settings.vibration_alerts)}
+                />
+               
+            </View>
+            <Text style={styles.sectionTitle}>Device RED Alerts</Text>
+                <View style={styles.section}>
+                <PreferenceItem 
+                    icon="alert-circle-outline"
+                    title="SOS Alerts"
+                    description="Alert when SOS button is pressed"
+                    value={settings.sos_alerts}
+                    color="#FF3B30"
+                    onToggle={() => handleToggle('sos_alerts', settings.sos_alerts)}
+                />
+               
+                 <PreferenceItem 
                     icon="flash-outline"
                     title="Power Disconnect"
                     description="Alert if tracker power is removed"
@@ -107,7 +138,7 @@ export default function NotificationPreferences() {
                     color="#FF3B30"
                     onToggle={() => handleToggle('power_cut_alerts', settings.power_cut_alerts)}
                 />
-            </View>
+                </View>
         </ScrollView>
     );
 }

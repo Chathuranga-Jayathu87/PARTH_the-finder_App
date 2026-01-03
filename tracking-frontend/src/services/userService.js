@@ -80,20 +80,48 @@ export const changePassword = async (oldPassword, newPassword) => {
 };
 
 // Fetch current notification preferences
+// export const getNotificationSettings = async () => {
+//   try {
+//     const token = await getAuthToken();
+//     const response = await fetch(`${BASE_URL}/settings/notifications`, {
+//       method: "GET",
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//         Accept: "application/json",
+//       },
+//     });
+//     return await response.json();
+//   } catch (error) {
+//     throw error;
+//   }
+// };
+
 export const getNotificationSettings = async () => {
+  const token = await getAuthToken();
+
+  const response = await fetch(`${BASE_URL}/settings/notifications`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+
+  const text = await response.text(); // 👈 IMPORTANT
+  console.log("Raw response:", response.status, text);
+
+  let data;
   try {
-    const token = await getAuthToken();
-    const response = await fetch(`${BASE_URL}/settings/notifications`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
-    });
-    return await response.json();
-  } catch (error) {
-    throw error;
+    data = JSON.parse(text);
+  } catch {
+    throw new Error("Invalid JSON response");
   }
+
+  if (!response.ok) {
+    throw new Error(data?.message || "Request failed");
+  }
+
+  return data;
 };
 
 // Update a specific setting

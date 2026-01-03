@@ -271,6 +271,30 @@ export default function DrawerLayout() {
       }}
       />
 
+      <Drawer.Screen
+      name="settings/notification"
+      options={{
+        title: 'Notification Settings',
+        headerStyle: {height:120},
+        headerLeft: () => (
+        <TouchableOpacity style={{marginLeft:15}} onPress={() => router.replace("/(app)/settings")}>
+          <View
+                style={{
+                  width: 45,
+                  height: 45,
+                  borderRadius: 20,
+                  backgroundColor: '#e0e0e0',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+          <Ionicons name="chevron-back" size={24} />
+          </View>
+        </TouchableOpacity>
+        ),
+        drawerItemStyle:{display:'none'},
+      }}
+      />
 
     </Drawer>
  </UserProvider>

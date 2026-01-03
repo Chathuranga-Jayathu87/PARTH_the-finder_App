@@ -139,10 +139,10 @@ router.put('/change-password', async (req, res) => {
 
 router.put('/settings/notifications', async (req, res) => {
     const { key, value } = req.body;
-    const userId = req.user.id;
-    
+    const userId = req.user.user_id;
+    console.log("Updating notification setting:", key, value);
     // Whitelist keys to prevent SQL injection
-    const allowedKeys = ['speed_alerts', 'geofence_alerts', 'low_battery_alerts', 'power_cut_alerts'];
+    const allowedKeys = ['overspeed_alerts', 'geofence_alerts', 'low_battery_alerts', 'power_cut_alerts', 'sos_alerts', 'vibration_alerts'];
     if (!allowedKeys.includes(key)) return res.status(400).json({ success: false });
 
     try {
@@ -159,5 +159,23 @@ router.put('/settings/notifications', async (req, res) => {
 });
 
 
+router.get('/settings/notifications', async (req, res) => {
+    const userId = req.user.user_id;
+
+    try {
+        const [rows] = await db.execute(
+            "SELECT overspeed_alerts, geofence_alerts, low_battery_alerts, power_cut_alerts, sos_alerts, vibration_alerts FROM user_settings WHERE user_id = ?",
+            [userId]
+        );
+
+        if (rows.length > 0) {
+            res.json({ success: true, settings: rows[0] });
+        } else {
+            res.json({ success: true, settings: { overspeed_alerts: 0, geofence_alerts: 0, low_battery_alerts: 0, power_cut_alerts: 0, sos_alerts: 0, vibration_alerts: 0 } });
+        }
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
 
 module.exports = router;
