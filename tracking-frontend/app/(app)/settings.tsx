@@ -73,7 +73,7 @@ export default function SettingsScreen() {
     }
 
     const appSettings = [
-    { id: '4', title: 'Notification Preferences', icon: 'notifications-outline', action: () => Alert.alert('App', 'Navigate to Notification Settings') },
+    { id: '4', title: 'Notification Preferences', icon: 'notifications-outline', action: () => router.push('/(app)/settings/notification') },
     { id: '5', title: 'Clear Cache', icon: 'trash-outline', action: () => Alert.alert('Clear Cache', 'Are you sure you want to clear the app cache?', [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Clear', onPress: () => handleClearCache(), style: 'destructive' }

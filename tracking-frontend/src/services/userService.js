@@ -3,12 +3,11 @@ import { getAuthToken } from "./authService";
 
 const BASE_URL = "http://172.20.10.3:5000/api/users";
 
-export const updateProfile = async (name, email, phone, imageUri) => {
+export const updateProfile = async (name, phone, imageUri) => {
   try {
     const authToken = await getAuthToken();
     const formData = new FormData();
     formData.append("name", name);
-    formData.append("email", email);
     formData.append("phone", phone);
 
     // Only attach if there is a new local image selected
@@ -73,6 +72,41 @@ export const changePassword = async (oldPassword, newPassword) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
+    });
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Fetch current notification preferences
+export const getNotificationSettings = async () => {
+  try {
+    const token = await getAuthToken();
+    const response = await fetch(`${BASE_URL}/settings/notifications`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Update a specific setting
+export const updateNotificationSetting = async (key, value) => {
+  try {
+    const token = await getAuthToken();
+    const response = await fetch(`${BASE_URL}/settings/notifications`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ key, value: value ? 1 : 0 }),
     });
     return await response.json();
   } catch (error) {

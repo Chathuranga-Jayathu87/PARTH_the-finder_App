@@ -16,6 +16,7 @@ const alertsRoutes = require('./routes/alerts.routes');
 const usersRoutes = require('./routes/user.routes');
 
 
+
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 8080;
@@ -29,7 +30,9 @@ app.use('/api/auth', authRoutes);      // http://172.20.10.3:5000/api/auth/login
 app.use('/api/vehicles', vehicleRoutes);  //http://172.20.10.3:5000/api/vehicles/register      http://172.20.10.3:5000/api/vehicles/id   
 app.use('/api/v1',registerdVehicles);     //http://172.20.10.3:5000/api/v1/vehicles
 app.use('/api/v1',alertsRoutes);  //http://172.20.10.3:5000/api/v1/alerts
-app.use('/api/users', usersRoutes);  //http://172.20.10.3:5000/api/users/update-profile
+app.use('/api/users', usersRoutes);  //http://172.20.10.3:5000/api/users/update-profile   //http://172.20.10.3:5000/api/users/profile  //http://172.20.10.30:5000/api/users/change-password  //http://172.20.10.30:5000/api/users/settings/notification
+
+
 // Test route
 app.get('/', (req, res) => {
     res.json({ message: 'Tracking Backend is online.' });

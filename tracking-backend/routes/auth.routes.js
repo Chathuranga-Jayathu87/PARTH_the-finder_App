@@ -15,14 +15,18 @@ const saltRounds = 10;
         return emailRegex.test(email) && email.length <= 255;
     };
 
+    
 
-    //Password validation function
+    //password can be alphanumeric and special characters
     const isValidPassword = (password) => {
         if(typeof password !== 'string') {
             return false;
         }
-        return password.length >= 8 && password.length <= 128; //Minimum length requirement
+        const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).+$/;
+        return passwordRegex.test(password) && password.length >= 8 && password.length <= 128;
     };
+
+
 
     //POST /api/auth/register
     router.post('/register', async(req, res) => {
@@ -55,7 +59,7 @@ const saltRounds = 10;
     
         //4. Insert the new user
         const insertQuery = ` INSERT INTO users (name, email, password_hash, phone_number) VALUES (?, ?, ?, ?)`;
-        await pool.query(insertQuery, [name, email, hashedPassword, phone_number || null]);
+        await pool.query(insertQuery, [name, email, hashedPassword, phone_number]);
         
         res.status(201).json({message: 'User registered successfully!'});
     
@@ -80,9 +84,9 @@ router.post('/login', async(req, res) => {
         return res.status(400).json({message: 'Email and Password are required or invalid. '});
     }
 
-    if(!isValidEmail(email) || !isValidPassword(password)){
-        return res.status(400).json({message: 'Invalid email or password format.'});
-    }
+    // if(!isValidEmail(email) || !isValidPassword(password)){
+    //     return res.status(400).json({message: 'Invalid email or password format.'});
+    // }
 
     try{
         //1. Get user by email

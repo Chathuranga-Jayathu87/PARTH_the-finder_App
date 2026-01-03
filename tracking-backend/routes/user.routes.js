@@ -23,49 +23,24 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
+    
 
-// UPDATE PROFILE ROUTE
-// router.put('/update-profile', upload.single('profile_image'), async (req, res) => {
-//     console.log("Update Profile Route Hit");
-//     const userId = req.user.user_id; // Retrieved from auth middleware
-//     const { name, email, phone } = req.body;
-//     let imagePath = null;
+        //Password validation function
+      const isValidPassword = (password) => {
+        if(typeof password !== 'string') {
+            return false;
+        }
+        const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).+$/;
+        return passwordRegex.test(password) && password.length >= 8 && password.length <= 128;
+    };
 
-//     if (req.file) {
-//         // Store the relative path in the database
-//         imagePath = `/uploads/${req.file.filename}`;
-//     }
 
-//     try {
-//         let query;
-//         let params;
-
-//         if (imagePath) {
-//             query = "UPDATE users SET name = ?, email = ?, phone_number = ?, profile_image = ? WHERE user_id = ?";
-//             params = [name, email, phone, imagePath, userId];
-//         } else {
-//             query = "UPDATE users SET name = ?, email = ?, phone_number = ? WHERE user_id = ?";
-//             params = [name, email, phone, userId];
-//         }
-
-//         const [result] = await db.execute(query, params);
-        
-//         res.json({ 
-//             success: true, 
-//             message: 'Profile updated successfully',
-//             imagePath: imagePath // Return this so the app can update the UI immediately
-//         });
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).json({ success: false, error: 'Database update failed' });
-//     }
-// });
 
 
 router.put('/update-profile', upload.single('profile_image'), async (req, res) => {
     const userId = req.user.user_id; // From token
-    const { name, email, phone } = req.body;
-    
+    const { name, phone } = req.body;
+
     try {
         // 1. Get the OLD image path before updating
         const [rows] = await db.execute("SELECT profile_image FROM users WHERE user_id = ?", [userId]);
@@ -75,8 +50,8 @@ router.put('/update-profile', upload.single('profile_image'), async (req, res) =
 
         if (req.file) {
             const newImagePath = `/uploads/${req.file.filename}`;
-            query = "UPDATE users SET name = ?, email = ?, phone_number = ?, profile_image = ?, created_at = ? WHERE user_id = ?";
-            params = [name, email, phone, newImagePath, new Date(), userId];
+            query = "UPDATE users SET name = ?, phone_number = ?, profile_image = ?, created_at = ? WHERE user_id = ?";
+            params = [name, phone, newImagePath, new Date(), userId];
 
             // 2. DELETE the old file from the disk if it exists
             if (oldImagePath) {
@@ -90,8 +65,8 @@ router.put('/update-profile', upload.single('profile_image'), async (req, res) =
                 });
             }
         } else {
-            query = "UPDATE users SET name = ?, email = ?, phone_number = ?, created_at = ? WHERE user_id = ?";
-            params = [name, email, phone, new Date(), userId];
+            query = "UPDATE users SET name = ?, phone_number = ?, created_at = ? WHERE user_id = ?";
+            params = [name, phone, new Date(), userId];
         }
 
         await db.execute(query, params);
@@ -122,9 +97,18 @@ router.get('/profile', async (req, res) => {
 });
 // CHANGE PASSWORD ROUTE
 
+
+
+
 router.put('/change-password', async (req, res) => {
     const userId = req.user.user_id;
     const { oldPassword, newPassword } = req.body;
+
+
+    // Validate new password
+    if (!isValidPassword(newPassword)) {
+        return res.status(400).json({ success: false, message: "New password must be between 8 and 128 characters." });
+    }
 
     try {
         // 1. Get the current hashed password from MySQL
@@ -151,6 +135,29 @@ router.put('/change-password', async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
 });
+
+
+router.put('/settings/notifications', async (req, res) => {
+    const { key, value } = req.body;
+    const userId = req.user.id;
+    
+    // Whitelist keys to prevent SQL injection
+    const allowedKeys = ['speed_alerts', 'geofence_alerts', 'low_battery_alerts', 'power_cut_alerts'];
+    if (!allowedKeys.includes(key)) return res.status(400).json({ success: false });
+
+    try {
+        const query = `
+            INSERT INTO user_settings (user_id, ${key}) 
+            VALUES (?, ?) 
+            ON DUPLICATE KEY UPDATE ${key} = ?
+        `;
+        await db.execute(query, [userId, value, value]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 
 
 module.exports = router;

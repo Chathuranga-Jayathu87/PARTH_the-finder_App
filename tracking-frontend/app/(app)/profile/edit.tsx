@@ -10,7 +10,7 @@ import { useUser } from '@/src/context/UserContext';
 export default function EditProfileScreen() {
     // These would ideally be initialized with data from your Auth Context or API
     const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
+    //const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [image, setImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -28,7 +28,7 @@ export default function EditProfileScreen() {
             if (response.success) {
                 const user = response.user;
                 setName(user.name || '');
-                setEmail(user.email || '');
+            //    setEmail(user.email || '');
                 setPhone(user.phone_number || '');
                 if (user.profile_image) {
                     const fullImageUrl = `http://172.20.10.3:5000${user.profile_image}`;
@@ -69,7 +69,7 @@ export default function EditProfileScreen() {
         setLoading(true);
         try {
             
-            const response = await updateProfile( name, email, phone, image);
+            const response = await updateProfile( name, phone, image);
 
             if (response.success) {
                 Alert.alert("Success", "Profile updated successfully!", [
@@ -116,14 +116,14 @@ export default function EditProfileScreen() {
                     placeholder="Enter your name"
                 />
 
-                <Text style={styles.label}>Email Address</Text>
+                {/* <Text style={styles.label}>Email Address</Text>
                 <TextInput 
                     style={styles.input} 
                     value={email} 
                     onChangeText={setEmail} 
                     keyboardType="email-address"
                     placeholder="Enter your email"
-                />
+                /> */}
 
                 <Text style={styles.label}>Phone Number</Text>
                 <TextInput 
