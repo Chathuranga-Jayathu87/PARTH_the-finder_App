@@ -1,13 +1,16 @@
 // app/(app)/_layout.tsx
-import React from 'react';
+import React ,{ useEffect }from 'react';
 import { Drawer } from 'expo-router/drawer';
 import { View, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import CustomDrawerContent from '../../components/CustomDrawerContent'; // We'll create this next
-import { DrawerNavigationProp } from '@react-navigation/drawer';
+import { DrawerContent, DrawerNavigationProp } from '@react-navigation/drawer';
 import { ParamListBase } from '@react-navigation/native';
 import { router } from 'expo-router';
-import { UserProvider } from '../../src/context/UserContext';
+import { UserProvider, useUser } from '../../src/context/UserContext';
+import { registerForPushNotificationsAsync } from '../../src/hooks/usePushNotifications';
+import { saveExpoPushToken } from '../../src/services/notificationService';
+
 
 type SidebarButtonProps = {
   navigation: DrawerNavigationProp<ParamListBase>;
@@ -35,9 +38,25 @@ const SidebarButton = ({ navigation }: SidebarButtonProps) =>(
 );
 
 
-export default function DrawerLayout() {
+ function DrawerLayout() {
+
+ const { user, jwt } = useUser(); // your logged-in user
+
+  useEffect(() => {
+    if (!user) return;
+
+    registerForPushNotificationsAsync().then(token => {
+      if (token) {
+        saveExpoPushToken(token, user.id, jwt);
+      }
+    });
+  }, [user]);
+
+
+
+
   return (
-  <UserProvider>
+  
     <Drawer 
       screenOptions={{
         headerTintColor: '#3f51b5', // Color of header text/icons
@@ -297,6 +316,15 @@ export default function DrawerLayout() {
       />
 
     </Drawer>
- </UserProvider>
+
+  
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <UserProvider>
+      <DrawerLayout />
+    </UserProvider>
   );
 }

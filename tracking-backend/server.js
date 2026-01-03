@@ -14,7 +14,7 @@ const vehicleRoutes = require('./routes/vehicle.routes');
 const registerdVehicles = require('./routes/vehicle.registerd.Routes');
 const alertsRoutes = require('./routes/alerts.routes');
 const usersRoutes = require('./routes/user.routes');
-
+const expoTokenRoutes = require('./routes/expo_token.routes');
 
 
 const app = express();
@@ -31,7 +31,7 @@ app.use('/api/vehicles', vehicleRoutes);  //http://172.20.10.3:5000/api/vehicles
 app.use('/api/v1',registerdVehicles);     //http://172.20.10.3:5000/api/v1/vehicles
 app.use('/api/v1',alertsRoutes);  //http://172.20.10.3:5000/api/v1/alerts
 app.use('/api/users', usersRoutes);  //http://172.20.10.3:5000/api/users/update-profile   //http://172.20.10.3:5000/api/users/profile  //http://172.20.10.30:5000/api/users/change-password  //http://172.20.10.30:5000/api/users/settings/notification
-
+app.use('/api/users', expoTokenRoutes); //http://172.20.10.3:5000/api/users/save-token
 
 // Test route
 app.get('/', (req, res) => {

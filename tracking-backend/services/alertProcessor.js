@@ -11,15 +11,15 @@ const ALARM_MAP = {
     'GEOFENCE_EXIT': { column: 'geofence_alerts', title: '📍 Geo-fence Alert', body: 'Vehicle has left the safe zone!' }
 };
 
-const processAlert = async (userId, deviceId, alarmType) => {
+const processAlert = async (userId, deviceId, alarmType, lat, lng) => {
     try {
         const config = ALARM_MAP[alarmType];
         if (!config) return console.log(`[Alert] Unknown alarm type: ${alarmType}`);
 
         // 1. Log to Alerts History (Always do this)
         await db.execute(
-            "INSERT INTO alerts (user_id, device_id, alert_type, message) VALUES (?, ?, ?, ?)",
-            [userId, deviceId, alarmType, config.body]
+            "INSERT INTO alerts (user_id, device_id, alert_type, message, lat, lng, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())",
+            [userId, deviceId, alarmType, config.body, lat, lng]
         );
 
         // 2. Check User Preferences from user_settings table
@@ -32,10 +32,15 @@ const processAlert = async (userId, deviceId, alarmType) => {
 
         // 3. Send Push Notification if enabled
         if (isEnabled === 1) {
-            await sendPushNotification(userId, {
+          await sendPushNotification(userId, {
                 title: config.title,
                 body: config.body,
-                data: { alarmType, deviceId }
+                data: {
+                    alarmType,
+                    deviceId,
+                    lat,
+                    lng
+                }
             });
             console.log(`[Push] Notification sent for ${alarmType} to User ${userId}`);
         }

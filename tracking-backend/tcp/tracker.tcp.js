@@ -783,7 +783,7 @@ async function handleAlarmPacket(socket, state, packet) {
         const gpsData = parseGpsData(packet, state.imei);
 
         // Store alarm with GPS data if available
-        await processAlert(state.userId, state.vehicleId, alarmType);
+        await processAlert(state.userId, state.vehicleId, alarmType, gpsData?.latitude || null, gpsData?.longitude || null);
         // await db.query(
         //     `INSERT INTO alerts 
         //      (vehicle_id, user_id, alert_type, message, lat, lng, created_at)

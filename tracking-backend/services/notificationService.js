@@ -1,27 +1,40 @@
 const db = require('../config/db');
-const admin = require('firebase-admin');
+const fetch = require('node-fetch');
 
 // Ensure firebase-admin is initialized in your server.js
 const sendPushNotification = async (userId, payload) => {
     try {
         // Fetch the user's FCM Token (Stored when they login to the app)
-        const [rows] = await db.execute("SELECT fcm_token FROM users WHERE id = ?", [userId]);
-        const fcmToken = rows[0]?.fcm_token;
+        const [rows] = await db.execute("SELECT expo_push_token FROM users WHERE user_id = ?", [userId]);
+        const fcmToken = rows[0]?.expo_push_token;
 
-        if (!fcmToken) return console.log(`No FCM token found for User ${userId}`);
+        if (!fcmToken) return console.log(`No Expo push token found for User ${userId}`);
 
         const message = {
-            notification: {
-                title: payload.title,
-                body: payload.body,
-            },
+            to: expoToken,
+            sound: 'default',
+            title: payload.title,
+            body: payload.body,
             data: payload.data || {},
-            token: fcmToken,
         };
 
-        await admin.messaging().send(message);
+         // 3. Send to Expo Push API
+        const response = await fetch(
+            'https://exp.host/--/api/v2/push/send',
+            {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(message),
+            }
+        );
+
+        const result = await response.json();
+        console.log('📤 Expo Push Result:', result);
     } catch (error) {
-        console.error("FCM Error:", error);
+        console.error("Expo Push Error:", error);
     }
 };
 
