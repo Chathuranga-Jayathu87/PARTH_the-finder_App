@@ -36,7 +36,6 @@ const PROTOCOL = {
     }
 };
 
-
 // ===========================================
 // 2. VALIDATION FUNCTIONS
 // ===========================================
@@ -122,6 +121,14 @@ const trackerTCPServer = net.createServer((socket) => {
         // Reconnection tracking
         isReconnection: false,
         previousDisconnectTime: null
+    };
+
+    // State template for each connection
+    state.lastGps = {
+        lat: null,
+        lng: null,
+        speed: null,
+        updatedAt: null
     };
 
     const clientAddress = `${socket.remoteAddress}:${socket.remotePort}`;
@@ -528,6 +535,9 @@ async function handleLoginPacket(socket, state, packet) {
 // 7. GPS DATA HANDLER (Single Record)
 // ===========================================
 
+
+
+
 async function handleGpsPacket(socket, state, packet) {
     if (!state.isAuthenticated) {
         console.log(`[TCP] GPS from unauthenticated device`);
@@ -554,6 +564,17 @@ async function handleGpsPacket(socket, state, packet) {
 
         // Store data
         await storeGpsData(gpsData, state, isHistorical);
+
+        // Update last GPS in state
+        if(gpsData){
+            state.lastGps = {
+                lat: gpsData.latitude,
+                lng: gpsData.longitude,
+                speed: gpsData.speed,
+                updatedAt: new Date()
+            };
+        }
+        
 
         if (isHistorical) {
             console.log(`[TCP] Historical GPS: ${state.imei} | Time: ${gpsData.timestamp}`);
@@ -774,38 +795,85 @@ async function handleHeartbeatPacket(socket, state, packet) {
 // 10. ALARM HANDLER
 // ===========================================
 
+// async function handleAlarmPacket(socket, state, packet) {
+//     if (!state.isAuthenticated) return;
+
+//     try {
+
+//         const alarmType = parseAlarmType(packet);
+//         const gpsData = parseGpsData(packet, state.imei);
+
+//         console.log(`[TCP] Alarm:gpsData`, gpsData?.latitude||null, gpsData?.longitude||null);
+//         // Store alarm with GPS data if available
+//         await processAlert(state.userId, state.vehicleId, alarmType, gpsData?.latitude || null, gpsData?.longitude || null);
+//         // await db.query(
+//         //     `INSERT INTO alerts 
+//         //      (vehicle_id, user_id, alert_type, message, lat, lng, created_at)
+//         //      VALUES (?, ?, ?, ?, ?, ?, NOW())`,
+//         //     [
+//         //         state.vehicleId,
+//         //         state.userId,
+//         //         alarmType,
+//         //         `Alarm: ${alarmType}`,
+//         //         gpsData?.latitude || null,
+//         //         gpsData?.longitude || null
+//         //     ]
+//         // );
+
+
+//         console.log(`[TCP] Alarm: ${state.imei} | Type: ${alarmType}`);
+//         sendResponse(socket, 'ACK');
+
+//     } catch (error) {
+//         console.error(`[TCP] Alarm error (${state.imei}): ${error.message}`);
+//     }
+// }
+
+// async function handleAlarmPacket(socket, state, packet) {
+//     if (!state.isAuthenticated) return;
+
+//     try {
+//         const alarmType = parseAlarmType(packet);
+
+//         // ✅ Use last GPS if current packet has none
+//         const gpsData = parseGpsData(packet, state.imei);
+//         const lat = gpsData?.latitude ?? state.lastLat ?? null;
+//         const lng = gpsData?.longitude ?? state.lastLng ?? null;
+
+//         await processAlert(state.userId, state.vehicleId, alarmType, lat, lng);
+
+//         console.log(`[TCP] Alarm: ${state.imei} | Type: ${alarmType} | Lat: ${lat} | Lng: ${lng}`);
+//         sendResponse(socket, 'ACK');
+
+//     } catch (error) {
+//         console.error(`[TCP] Alarm error (${state.imei}): ${error.message}`);
+//     }
+// }
+
 async function handleAlarmPacket(socket, state, packet) {
-    if (!state.isAuthenticated) return;
+  if (!state.isAuthenticated) return;
 
-    try {
+  const alarmType = parseAlarmType(packet);
 
-        const alarmType = parseAlarmType(packet);
-        const gpsData = parseGpsData(packet, state.imei);
+  const lat = state.lastGps?.lat ?? null;
+  const lng = state.lastGps?.lng ?? null;
 
-        // Store alarm with GPS data if available
-        await processAlert(state.userId, state.vehicleId, alarmType, gpsData?.latitude || null, gpsData?.longitude || null);
-        // await db.query(
-        //     `INSERT INTO alerts 
-        //      (vehicle_id, user_id, alert_type, message, lat, lng, created_at)
-        //      VALUES (?, ?, ?, ?, ?, ?, NOW())`,
-        //     [
-        //         state.vehicleId,
-        //         state.userId,
-        //         alarmType,
-        //         `Alarm: ${alarmType}`,
-        //         gpsData?.latitude || null,
-        //         gpsData?.longitude || null
-        //     ]
-        // );
+  await processAlert(
+    state.userId,
+    state.vehicleId,
+    alarmType,
+    lat,
+    lng
+  );
 
+  console.log(
+    `[TCP] Alarm: ${state.imei} | ${alarmType} | Lat: ${lat} | Lng: ${lng}`
+  );
 
-        console.log(`[TCP] Alarm: ${state.imei} | Type: ${alarmType}`);
-        sendResponse(socket, 'ACK');
-
-    } catch (error) {
-        console.error(`[TCP] Alarm error (${state.imei}): ${error.message}`);
-    }
+  sendResponse(socket, "ACK");
 }
+
+
 
 // ===========================================
 // 11. PARSING FUNCTIONS

@@ -1,6 +1,8 @@
 const BASE_URL = "http://172.20.10.3:5000/api/users";
 
-export const saveExpoPushToken = async (token, userId, jwt) => {
+export const saveExpoPushToken = async (token, jwt) => {
+  console.log("💾 Saving Expo Push Token to backend:", token);
+  console.log("💾 Using JWT:", jwt);
   await fetch(`${BASE_URL}/save-token`, {
     method: "POST",
     headers: {
@@ -8,7 +10,6 @@ export const saveExpoPushToken = async (token, userId, jwt) => {
       Authorization: `Bearer ${jwt}`, // if you have auth
     },
     body: JSON.stringify({
-      userId,
       expoPushToken: token,
     }),
   });

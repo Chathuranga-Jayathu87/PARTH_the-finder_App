@@ -7,10 +7,11 @@ import CustomDrawerContent from '../../components/CustomDrawerContent'; // We'll
 import { DrawerContent, DrawerNavigationProp } from '@react-navigation/drawer';
 import { ParamListBase } from '@react-navigation/native';
 import { router } from 'expo-router';
-import { UserProvider, useUser } from '../../src/context/UserContext';
+import { UserProvider } from '../../src/context/UserContext';
 import { registerForPushNotificationsAsync } from '../../src/hooks/usePushNotifications';
 import { saveExpoPushToken } from '../../src/services/notificationService';
-
+import { getAuthToken } from '@/src/services/authService';
+import {useNotificationNavigation} from '../../src/hooks/useNotificationNavigation';
 
 type SidebarButtonProps = {
   navigation: DrawerNavigationProp<ParamListBase>;
@@ -40,19 +41,30 @@ const SidebarButton = ({ navigation }: SidebarButtonProps) =>(
 
  function DrawerLayout() {
 
- const { user, jwt } = useUser(); // your logged-in user
+  useNotificationNavigation();
 
   useEffect(() => {
-    if (!user) return;
+    const registerToken = async () => {
+      try {
+        // 1️⃣ Get JWT (async)
+        const jwt = await getAuthToken();
+        if (!jwt) return;
 
-    registerForPushNotificationsAsync().then(token => {
-      if (token) {
-        saveExpoPushToken(token, user.id, jwt);
+        // 2️⃣ Get Expo Push Token (async)
+        const expoToken = await registerForPushNotificationsAsync();
+        if (!expoToken) return;
+
+        // 3️⃣ Send both to server
+        await saveExpoPushToken(expoToken, jwt);
+
+        console.log("✅ Expo Token registered successfully:", expoToken);
+
+      } catch (err) {
+        console.error("Failed to register Expo Push Token:", err);
       }
-    });
-  }, [user]);
-
-
+    };
+     registerToken();
+  }, []);
 
 
   return (

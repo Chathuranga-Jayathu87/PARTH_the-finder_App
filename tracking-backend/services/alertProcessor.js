@@ -11,15 +11,17 @@ const ALARM_MAP = {
     'GEOFENCE_EXIT': { column: 'geofence_alerts', title: '📍 Geo-fence Alert', body: 'Vehicle has left the safe zone!' }
 };
 
-const processAlert = async (userId, deviceId, alarmType, lat, lng) => {
+const processAlert = async (userId, vehicleid, alarmType, lat, lng) => {
     try {
         const config = ALARM_MAP[alarmType];
         if (!config) return console.log(`[Alert] Unknown alarm type: ${alarmType}`);
 
+        console.log(lat, lng);
+
         // 1. Log to Alerts History (Always do this)
         await db.execute(
-            "INSERT INTO alerts (user_id, device_id, alert_type, message, lat, lng, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())",
-            [userId, deviceId, alarmType, config.body, lat, lng]
+            "INSERT INTO alerts (user_id, vehicle_id, alert_type, message, lat, lng, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())",
+            [userId, vehicleid, alarmType, config.body, lat, lng]
         );
 
         // 2. Check User Preferences from user_settings table
@@ -37,7 +39,7 @@ const processAlert = async (userId, deviceId, alarmType, lat, lng) => {
                 body: config.body,
                 data: {
                     alarmType,
-                    deviceId,
+                    vehicleid,
                     lat,
                     lng
                 }

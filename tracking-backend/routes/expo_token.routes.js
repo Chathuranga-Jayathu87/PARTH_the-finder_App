@@ -9,13 +9,13 @@ console.log("Expo Token Routes Loaded");
 
 
 router.post('/save-token', async (req, res) => {
-  const { userId, expoPushToken } = req.body;
-  if (!userId || !expoPushToken) return res.status(400).send('Missing data');
+  const { expoPushToken } = req.body;
+  if (!expoPushToken) return res.status(400).send('Missing data');
 
   try {
     await db.execute(
       `UPDATE users SET expo_push_token = ? WHERE user_id = ?`,
-      [expoPushToken, userId]
+      [expoPushToken, req.user.user_id]
     );
 
     res.send({ success: true });
