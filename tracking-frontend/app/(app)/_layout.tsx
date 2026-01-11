@@ -6,13 +6,13 @@ import { Ionicons } from '@expo/vector-icons';
 import CustomDrawerContent from '../../components/CustomDrawerContent'; // We'll create this next
 import { DrawerContent, DrawerNavigationProp } from '@react-navigation/drawer';
 import { ParamListBase } from '@react-navigation/native';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { UserProvider } from '../../src/context/UserContext';
 import { registerForPushNotificationsAsync } from '../../src/hooks/usePushNotifications';
 import { saveExpoPushToken } from '../../src/services/notificationService';
 import { getAuthToken } from '@/src/services/authService';
 import {useNotificationNavigation} from '../../src/hooks/useNotificationNavigation';
-
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 type SidebarButtonProps = {
   navigation: DrawerNavigationProp<ParamListBase>;
 };
@@ -64,11 +64,10 @@ const SidebarButton = ({ navigation }: SidebarButtonProps) =>(
       }
     };
      registerToken();
-  }, []);
+}, []);
 
-
-  return (
-  
+return (
+  <GestureHandlerRootView style={{ flex: 1 }}>
     <Drawer 
       screenOptions={{
         headerTintColor: '#3f51b5', // Color of header text/icons
@@ -352,7 +351,8 @@ const SidebarButton = ({ navigation }: SidebarButtonProps) =>(
       }}
       />
 
-    </Drawer>
+      </Drawer>
+    </GestureHandlerRootView>
 
 
 

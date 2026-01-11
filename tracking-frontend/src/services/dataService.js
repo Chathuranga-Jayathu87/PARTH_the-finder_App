@@ -76,7 +76,7 @@ export const markAsRead = async (alertId) => {
   try {
     const headers = await getSecuredHeaders();
 
-    const response = await fetch(`${API_BASE_URL}/alerts/${alertId}/read`, {
+    const response = await fetch(`${API_BASE_URL}/alerts/${alertId}`, {
       method: "PUT",
       headers: headers,
     });
