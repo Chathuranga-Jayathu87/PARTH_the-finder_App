@@ -3,6 +3,7 @@ import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } f
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Link, router } from 'expo-router';   
 import { login } from '../../src/services/authService';
+import { ColorProperties } from 'react-native-reanimated/lib/typescript/Colors';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -53,7 +54,7 @@ export default function Login() {
             />
 
             <Button title="Login" onPress={handleLogin} disabled={loading} />
-            <Text>Not registered?<Link href="/(auth)/Register"> Sign up here.</Link></Text>
+            <Text>Not registered?<Link href="/(auth)/Register" style={styles.span}> Sign up here.</Link></Text>
 
             {loading && <ActivityIndicator style={{ marginTop: 10 }} />}
         </View>
@@ -71,5 +72,6 @@ const styles = StyleSheet.create({
         padding: 10,
         backgroundColor: '#fff',
         color: '#000',
-    }
+    },
+    span: { color: 'red' },
 });

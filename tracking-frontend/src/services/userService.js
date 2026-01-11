@@ -107,7 +107,7 @@ export const getNotificationSettings = async () => {
     },
   });
 
-  const text = await response.text(); // 👈 IMPORTANT
+  const text = await response.text();
   console.log("Raw response:", response.status, text);
 
   let data;

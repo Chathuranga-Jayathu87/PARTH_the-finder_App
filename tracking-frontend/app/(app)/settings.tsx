@@ -1,7 +1,7 @@
 // app/(app)/settings.tsx
 
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { clearAuthToken } from '@/src/services/authService'; 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -16,8 +16,8 @@ const userSettings = [
 
 
 const aboutItems = [
-    { id: '6', title: 'Privacy Policy', icon: 'document-text-outline', action: () => Alert.alert('Info', 'Open Privacy Policy link') },
-    { id: '7', title: 'Terms of Service', icon: 'receipt-outline', action: () => Alert.alert('Info', 'Open Terms link') },
+    { id: '6', title: 'Privacy Policy', icon: 'document-text-outline', action: () => Linking.openURL('https://example.com/privacy').catch(() => Alert.alert('Error', 'Failed to open privacy policy.')) },
+    { id: '7', title: 'Terms of Service', icon: 'receipt-outline', action: () => Linking.openURL('https://example.com/terms').catch(() => Alert.alert('Error', 'Failed to load terms.')) },
     // ⚠️ The Logout action is typically placed here or handled by the Drawer
     // { id: '8', title: 'Logout', icon: 'log-out-outline', action: handleLogout },
 ];

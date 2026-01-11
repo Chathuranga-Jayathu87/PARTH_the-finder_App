@@ -327,7 +327,37 @@ const SidebarButton = ({ navigation }: SidebarButtonProps) =>(
       }}
       />
 
+      <Drawer.Screen
+      name="alerts/[id]"
+      options={{
+        title: 'Alert Details',
+        headerStyle: {height:120},
+        headerLeft: () => (
+        <TouchableOpacity style={{marginLeft:15}} onPress={() => router.replace("/(app)/alerts")}>
+          <View
+                style={{
+                  width: 45,
+                  height: 45,
+                  borderRadius: 20,
+                  backgroundColor: '#e0e0e0',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+          <Ionicons name="chevron-back" size={24} />
+          </View>
+        </TouchableOpacity>
+        ),
+        drawerItemStyle:{display:'none'},
+      }}
+      />
+
     </Drawer>
+
+
+
+
+
 
   
   );

@@ -71,3 +71,27 @@ export const getAlerts = async () => {
     throw error;
   }
 };
+
+export const markAsRead = async (alertId) => {
+  try {
+    const headers = await getSecuredHeaders();
+
+    const response = await fetch(`${API_BASE_URL}/alerts/${alertId}/read`, {
+      method: "PUT",
+      headers: headers,
+    });
+
+    const data = await response.json();
+    console.log("Status:", response.status);
+    console.log(data);
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to mark alert as read.");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error marking alert as read:", error.message);
+    throw error;
+  }
+};

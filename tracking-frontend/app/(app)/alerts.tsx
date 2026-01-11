@@ -324,17 +324,19 @@
 
 
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
-  ActivityIndicator
+  ActivityIndicator,TouchableOpacity, Alert,
+  Animated
 } from 'react-native';
+import { GestureHandlerRootView,Swipeable,SwipeableProps  } from 'react-native-gesture-handler';
 import { useFocusEffect, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { getAlerts } from '../../src/services/dataService';
+import { getAlerts, markAsRead } from '../../src/services/dataService';
 
 /* ==============================
    TYPE (MATCHES BACKEND RESPONSE)
@@ -386,10 +388,47 @@ export default function AlertsScreen() {
     }, [])
   );
 
-  /* ==============================
-     ICON HANDLER (SAFE)
-  ================================ */
-  const getIcon = (type?: string) => {
+  //useFocusEffect(useCallback(() => { loadAlerts(); }, []));
+
+//Dismiss single Alert
+const handleDismiss = async (alertId: number) => {
+    try {
+      await markAsRead(alertId);
+      //Remove the read alert from the list
+      setAlerts((prevAlerts) =>
+        prevAlerts.filter((alert) => alert.alert_id !== alertId)
+      );
+    } catch (error) {
+      Alert.alert('Error', 'Failed to dismiss alert.');
+    }
+
+  };
+
+  // --- RENDER RIGHT ACTION (The Delete Button) ---
+  const renderRightActions = (id: number, progress: any, dragX: any) => {
+    const scale = dragX.interpolate({
+      inputRange: [-100, 0],
+      outputRange: [1, 0],
+      extrapolate: 'clamp',
+    });
+  
+  return (
+      <TouchableOpacity onPress={() => handleDismiss(id)} activeOpacity={0.6}>
+        <View style={styles.deleteBox}>
+          <Animated.Text style={[styles.deleteText, { transform: [{ scale }] }]}>
+            Dismiss
+          </Animated.Text>
+          <Ionicons name="trash-outline" size={24} color="white" />
+        </View>
+      </TouchableOpacity>
+    );
+  
+  
+  }
+
+ //    ICON HANDLER (SAFE)
+
+ const getIcon = (type?: string) => {
     if (!type) {
       return { name: 'alert-circle-outline', color: '#9e9e9e' };
     }
@@ -417,26 +456,53 @@ export default function AlertsScreen() {
     const icon = getIcon(item.alert_type);
 
     return (
-      <View style={styles.alertCard}>
-        <Ionicons
-          name={icon.name as any}
-          size={26}
-          color={icon.color}
-          style={styles.icon}
-        />
+      // <View style={styles.alertCard}>
+      //   <Ionicons
+      //     name={icon.name as any}
+      //     size={26}
+      //     color={icon.color}
+      //     style={styles.icon}
+      //   />
 
-        <View style={styles.textDetails}>
-          <Text style={styles.alertTitle}>
-            {item.license_plate} • {item.alert_type.replace('_', ' ')}
-          </Text>
+      //   <View style={styles.textDetails}>
+      //     <Text style={styles.alertTitle}>
+      //       {item.license_plate} • {item.alert_type.replace('_', ' ')}
+      //     </Text>
 
-          <Text style={styles.alertMessage}>{item.message}</Text>
+      //     <Text style={styles.alertMessage}>{item.message}</Text>
 
-          <Text style={styles.alertTime}>
-            {new Date(item.created_at).toLocaleString()}
-          </Text>
-        </View>
-      </View>
+      //     <Text style={styles.alertTime}>
+      //       {new Date(item.created_at).toLocaleString()}
+      //     </Text>
+      //   </View>
+
+      //   {/* DISMISS BUTTON */}
+      //   <TouchableOpacity onPress={() => handleDismiss(item.alert_id)} style={styles.dismissBtn}>
+      //     <Ionicons name="checkmark-done-outline" size={24} color="#4CAF50" />
+      //   </TouchableOpacity>
+      // </View>
+
+      <GestureHandlerRootView>
+        <Swipeable
+          renderRightActions={(progress, dragX) => 
+            renderRightActions(item.alert_id, progress, dragX)
+          }
+          onSwipeableOpen={() => handleDismiss(item.alert_id)} // Option: delete automatically on full swipe
+        >
+          <View style={styles.alertCard}>
+            <Ionicons name={icon.name as any} size={26} color={icon.color} style={styles.icon} />
+            <View style={styles.textDetails}>
+              <Text style={styles.alertTitle}>
+                {item.license_plate} • {item.alert_type.replace('_', ' ')}
+              </Text>
+              <Text style={styles.alertMessage}>{item.message}</Text>
+              <Text style={styles.alertTime}>{new Date(item.created_at).toLocaleString()}</Text>
+            </View>
+          </View>
+        </Swipeable>
+      </GestureHandlerRootView>
+
+
     );
   };
 
@@ -528,4 +594,24 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
   },
+  dismissBtn: {
+    padding: 10,
+    marginLeft: 5,
+  },
+  deleteBox: {
+    backgroundColor: '#FF3B30',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 100,
+    height: '90%',
+    flexDirection: 'row',
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  deleteText: {
+    color: 'white',
+    fontWeight: '600',
+    marginRight: 5,
+  },
 });
+
