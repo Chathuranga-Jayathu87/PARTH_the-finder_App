@@ -23,6 +23,12 @@ const RootLayout = () => {
         options={{ headerShown: true , title: 'Register' }} 
       />
 
+      {/* 4. The forgot password screen */}
+      <Stack.Screen 
+        name="(auth)/frogot-password" 
+        options={{ headerShown: true , title: 'Forgot Password' }} 
+      />
+
       
 
  {/* 🚀 NEW: The main application group (which uses the Drawer/Sidebar layout) */}
