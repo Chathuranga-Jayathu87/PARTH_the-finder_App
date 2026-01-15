@@ -1,27 +1,756 @@
 // // app/(app)/alerts.tsx
+// import React, { useRef, useState, useCallback } from 'react';
+// import { useFocusEffect, router } from 'expo-router';
+// import {
+//   View,
+//   Text,
+//   StyleSheet,
+//   FlatList,
+//   TouchableOpacity,
+//   Animated,
+//   ActivityIndicator,
+// } from 'react-native';
+// import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
+// import { Ionicons } from '@expo/vector-icons';
+// import { getAlerts, markAsRead } from '@/src/services/dataService';
 
-import React, { useState, useCallback, useRef } from 'react';
+// /* ==============================
+//    TYPES
+// ================================ */
+// interface AlertItem {
+//   alert_id: number;
+//   alert_type: string;
+//   message: string;
+//   license_plate: string;
+//   created_at: string;
+// }
+
+// export default function AlertsScreen() {
+//   const [alerts, setAlerts] = useState<AlertItem[]>([]);
+//   const [loading, setLoading] = useState(true);
+  
+//   // Use string keys for Maps to match alert_id.toString()
+//   const rowRefs = useRef<Map<string, Swipeable>>(new Map());
+//   const heightAnims = useRef<Map<string, Animated.Value>>(new Map());
+
+//   /* ==============================
+//      DATA LOADING
+//   ================================ */
+//   useFocusEffect(
+//     useCallback(() => {
+//       const loadAlerts = async () => {
+//         setLoading(true);
+//         try {
+//           const data = await getAlerts();
+//           setAlerts(
+//             data.map((a: any) => ({
+//               ...a,
+//               alert_type: a.alert_type ?? 'UNKNOWN',
+//             }))
+//           );
+//         } catch (error: any) {
+//           if (error?.message?.includes('Authentication')) {
+//             router.replace('/(auth)/Login');
+//           }
+//         } finally {
+//           setLoading(false);
+//         }
+//       };
+//       loadAlerts();
+//     }, [])
+//   );
+
+//   /* ==============================
+//      ACTIONS
+//   ================================ */
+//   const closeOthers = (id: string) => {
+//     rowRefs.current.forEach((ref, key) => {
+//       if (key !== id) {
+//         ref?.close();
+//       }
+//     });
+//   };
+
+//   const deleteItem = async (id: string, anim: Animated.Value) => {
+//     try {
+//       // Call API first
+//       await markAsRead(parseInt(id));
+
+//       // Animate out
+//       Animated.timing(anim, {
+//         toValue: 0,
+//         duration: 250,
+//         useNativeDriver: false, // Height/ScaleY requires false for layout changes
+//       }).start(() => {
+//         setAlerts((prev) => prev.filter((item) => item.alert_id.toString() !== id));
+//         rowRefs.current.delete(id);
+//         heightAnims.current.delete(id);
+//       });
+//     } catch (error) {
+//       console.error("Failed to dismiss alert", error);
+//       const ref = rowRefs.current.get(id);
+//       ref?.close();
+//     }
+//   };
+
+//   /* ==============================
+//      RENDER HELPERS
+//   ================================ */
+//   const renderItem = ({ item }: { item: AlertItem }) => {
+//     const idStr = item.alert_id.toString();
+
+//     // Initialize animation value if it doesn't exist
+//     if (!heightAnims.current.has(idStr)) {
+//       heightAnims.current.set(idStr, new Animated.Value(1));
+//     }
+//     const heightAnim = heightAnims.current.get(idStr)!;
+
+//     const renderRightActions = () => (
+//       <TouchableOpacity
+//         style={styles.deleteBtn}
+//         onPress={() => deleteItem(idStr, heightAnim)}
+//       >
+//         <Ionicons name="trash-outline" size={24} color="#fff" />
+//         <Text style={styles.deleteText}>Dismiss</Text>
+//       </TouchableOpacity>
+//     );
+
+//     return (
+//       <Animated.View
+//         style={{
+//           transform: [{ scaleY: heightAnim }],
+//           opacity: heightAnim,
+//         }}
+//       >
+//         <Swipeable
+//           ref={(ref) => {
+//             if (ref) rowRefs.current.set(idStr, ref);
+//           }}
+//           renderRightActions={renderRightActions}
+//           onSwipeableOpen={() => closeOthers(idStr)}
+//           overshootRight={false}
+//           rightThreshold={40}
+//         >
+//           <View style={styles.row}>
+//             <View style={styles.content}>
+//               <Text style={styles.title}>
+//                 {item.license_plate} • {item.alert_type}
+//               </Text>
+//               <Text style={styles.message}>{item.message}</Text>
+//               <Text style={styles.time}>
+//                 {new Date(item.created_at).toLocaleTimeString()}
+//               </Text>
+//             </View>
+//             <Ionicons name="chevron-back" size={16} color="#ccc" />
+//           </View>
+//         </Swipeable>
+//       </Animated.View>
+//     );
+//   };
+
+//   if (loading) {
+//     return (
+//       <View style={styles.center}>
+//         <ActivityIndicator size="large" color="#3f51b5" />
+//       </View>
+//     );
+//   }
+
+//   return (
+//     <GestureHandlerRootView style={{ flex: 1 }}>
+//       <View style={styles.container}>
+//         <FlatList
+//           data={alerts}
+//           keyExtractor={(item) => item.alert_id.toString()}
+//           renderItem={renderItem}
+//           contentContainerStyle={{ padding: 12 }}
+//           ListEmptyComponent={
+//             <View style={styles.center}>
+//               <Text style={{ color: '#999' }}>No alerts found</Text>
+//             </View>
+//           }
+//         />
+//       </View>
+//     </GestureHandlerRootView>
+//   );
+// }
+
+// /* ==============================
+//    STYLES
+// ================================ */
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     backgroundColor: '#f2f2f2',
+//   },
+//   center: {
+//     flex: 1,
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//   },
+//   row: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     backgroundColor: '#fff',
+//     padding: 16,
+//     borderRadius: 12,
+//     marginBottom: 10,
+//     elevation: 2,
+//     shadowColor: '#000',
+//     shadowOffset: { width: 0, height: 1 },
+//     shadowOpacity: 0.1,
+//     shadowRadius: 2,
+//   },
+//   content: {
+//     flex: 1,
+//   },
+//   title: {
+//     fontWeight: 'bold',
+//     fontSize: 14,
+//     color: '#333',
+//   },
+//   message: {
+//     fontSize: 13,
+//     color: '#666',
+//     marginVertical: 4,
+//   },
+//   time: {
+//     fontSize: 11,
+//     color: '#999',
+//   },
+//   deleteBtn: {
+//     backgroundColor: '#FF3B30',
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//     width: 80,
+//     borderRadius: 12,
+//     marginBottom: 10,
+//     marginLeft: 10,
+//   },
+//   deleteText: {
+//     color: '#fff',
+//     fontSize: 10,
+//     fontWeight: '600',
+//     marginTop: 4,
+//   },
+// });
+
+
+
+
+
+
+
+
+
+
+// import React, { useRef, useState, useCallback } from 'react';
+// import { useFocusEffect, router } from 'expo-router';
+// import {
+//   View,
+//   Text,
+//   StyleSheet,
+//   FlatList,
+//   TouchableOpacity,
+//   Animated,
+//   ActivityIndicator,
+//   RefreshControl, // 1. Import RefreshControl
+// } from 'react-native';
+// import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
+// import { Ionicons } from '@expo/vector-icons';
+// import { getAlerts, markAsRead } from '@/src/services/dataService';
+
+// interface AlertItem {
+//   alert_id: number;
+//   alert_type: string;
+//   message: string;
+//   license_plate: string;
+//   created_at: string;
+// }
+
+// export default function AlertsScreen() {
+//   const [alerts, setAlerts] = useState<AlertItem[]>([]);
+//   const [loading, setLoading] = useState(true);
+//   const [refreshing, setRefreshing] = useState(false); // 2. State for refreshing
+
+//   const rowRefs = useRef<Map<string, Swipeable>>(new Map());
+//   const heightAnims = useRef<Map<string, Animated.Value>>(new Map());
+
+//   /* ==============================
+//      DATA FETCHING
+//   ================================ */
+//   const loadAlerts = async (isRefreshing = false) => {
+//     if (isRefreshing) setRefreshing(true);
+//     else setLoading(true);
+
+//     try {
+//       const data = await getAlerts();
+//       setAlerts(
+//         data.map((a: any) => ({
+//           ...a,
+//           alert_type: a.alert_type ?? 'UNKNOWN',
+//         }))
+//       );
+//     } catch (error: any) {
+//       if (error?.message?.includes('Authentication')) {
+//         router.replace('/(auth)/Login');
+//       }
+//     } finally {
+//       setLoading(false);
+//       setRefreshing(false);
+//     }
+//   };
+
+//   useFocusEffect(
+//     useCallback(() => {
+//       loadAlerts();
+//     }, [])
+//   );
+
+//   const onRefresh = useCallback(() => {
+//     loadAlerts(true);
+//   }, []);
+
+//   /* ==============================
+//      SWIPE ACTIONS
+//   ================================ */
+//   const closeOthers = (id: string) => {
+//     rowRefs.current.forEach((ref, key) => {
+//       if (key !== id) ref?.close();
+//     });
+//   };
+
+//   const deleteItem = async (id: string, anim: Animated.Value) => {
+//     try {
+//       await markAsRead(parseInt(id));
+      
+//       Animated.timing(anim, {
+//         toValue: 0,
+//         duration: 250,
+//         useNativeDriver: false,
+//       }).start(() => {
+//         setAlerts((prev) => prev.filter((item) => item.alert_id.toString() !== id));
+//         rowRefs.current.delete(id);
+//         heightAnims.current.delete(id);
+//       });
+//     } catch (error) {
+//       rowRefs.current.get(id)?.close();
+//     }
+//   };
+
+//   /* ==============================
+//      RENDER
+//   ================================ */
+//   const renderItem = ({ item }: { item: AlertItem }) => {
+//     const idStr = item.alert_id.toString();
+//     if (!heightAnims.current.has(idStr)) {
+//       heightAnims.current.set(idStr, new Animated.Value(1));
+//     }
+//     const heightAnim = heightAnims.current.get(idStr)!;
+
+//     return (
+//       <Animated.View style={{ transform: [{ scaleY: heightAnim }], opacity: heightAnim }}>
+//         <Swipeable
+//           ref={(ref) => { if (ref) rowRefs.current.set(idStr, ref); }}
+//           onSwipeableOpen={() => closeOthers(idStr)}
+//           overshootRight={false}
+//           renderRightActions={() => (
+//             <TouchableOpacity 
+//               style={styles.deleteBtn} 
+//               onPress={() => deleteItem(idStr, heightAnim)}
+//             >
+//               <Ionicons name="trash-outline" size={24} color="#fff" />
+//             </TouchableOpacity>
+//           )}
+//         >
+//           <View style={styles.row}>
+//             <View style={styles.content}>
+//               <Text style={styles.title}>{item.license_plate} • {item.alert_type}</Text>
+//               <Text style={styles.message}>{item.message}</Text>
+//               <Text style={styles.time}>{new Date(item.created_at).toLocaleTimeString()}</Text>
+//             </View>
+//             <Ionicons name="chevron-back" size={16} color="#ccc" />
+//           </View>
+//         </Swipeable>
+//       </Animated.View>
+//     );
+//   };
+
+//   return (
+//     <GestureHandlerRootView style={{ flex: 1 }}>
+//       <View style={styles.container}>
+//         {loading && !refreshing ? (
+//           <View style={styles.center}><ActivityIndicator size="large" color="#3f51b5" /></View>
+//         ) : (
+//           <FlatList
+//             data={alerts}
+//             keyExtractor={(item) => item.alert_id.toString()}
+//             renderItem={renderItem}
+//             contentContainerStyle={{ padding: 12 }}
+//             refreshControl={
+//               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#3f51b5']} />
+//             }
+//             ListEmptyComponent={
+//               <View style={styles.center}><Text style={{ color: '#999' }}>No alerts found</Text></View>
+//             }
+//           />
+//         )}
+//       </View>
+//     </GestureHandlerRootView>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   container: { flex: 1, backgroundColor: '#f2f2f2' },
+//   center: { flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 50 },
+//   row: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     backgroundColor: '#fff',
+//     padding: 16,
+//     borderRadius: 12,
+//     marginBottom: 10,
+//   },
+//   content: { flex: 1 },
+//   title: { fontWeight: 'bold', fontSize: 14, color: '#333' },
+//   message: { fontSize: 13, color: '#666', marginVertical: 4 },
+//   time: { fontSize: 11, color: '#999' },
+//   deleteBtn: {
+//     backgroundColor: '#FF3B30',
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//     width: 70,
+//     borderRadius: 12,
+//     marginBottom: 10,
+//     marginLeft: 10,
+//   },
+// });
+
+
+
+// import React, { useRef, useState, useCallback } from 'react';
+// import { useFocusEffect, router } from 'expo-router';
+// import {
+//   View,
+//   Text,
+//   StyleSheet,
+//   FlatList,
+//   TouchableOpacity,
+//   Animated,
+//   ActivityIndicator,
+//   RefreshControl,
+// } from 'react-native';
+// import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
+// import { Ionicons } from '@expo/vector-icons';
+// import { getAlerts, markAsRead } from '@/src/services/dataService';
+
+// /* ==============================
+//    TYPES
+// ================================ */
+// interface AlertItem {
+//   alert_id: number;
+//   alert_type: string;
+//   message: string;
+//   license_plate: string;
+//   created_at: string;
+// }
+
+// /* ==============================
+//    ICON SELECTOR HELPER
+// ================================ */
+// const getIcon = (type?: string) => {
+//   if (!type) {
+//     return { name: 'alert-circle-outline', color: '#9e9e9e' };
+//   }
+
+//   switch (type.toLowerCase()) {
+//     case 'sos':
+//       return { name: 'warning-outline', color: '#f44336' };
+//     case 'overspeed':
+//       return { name: 'speedometer-outline', color: '#ff5722' };
+//     case 'geofence':
+//       return { name: 'map-outline', color: '#3f51b5' };
+//     case 'low_battery':
+//       return { name: 'battery-dead-outline', color: '#ff9800' };
+//     case 'power_cut':
+//       return { name: 'flash-outline', color: '#795548' };
+//     default:
+//       return { name: 'notifications-outline', color: '#607d8b' };
+//   }
+// };
+
+// export default function AlertsScreen() {
+//   const [alerts, setAlerts] = useState<AlertItem[]>([]);
+//   const [loading, setLoading] = useState(true);
+//   const [refreshing, setRefreshing] = useState(false);
+
+//   // Refs for managing animations and swipe states
+//   const rowRefs = useRef<Map<string, Swipeable>>(new Map());
+//   const heightAnims = useRef<Map<string, Animated.Value>>(new Map());
+
+//   /* ==============================
+//      DATA FETCHING
+//   ================================ */
+//   const loadAlerts = async (isRefreshing = false) => {
+//     if (isRefreshing) setRefreshing(true);
+//     else setLoading(true);
+
+//     try {
+//       const data = await getAlerts();
+//       setAlerts(
+//         data.map((a: any) => ({
+//           ...a,
+//           alert_type: a.alert_type ?? 'UNKNOWN',
+//         }))
+//       );
+//     } catch (error: any) {
+//       if (error?.message?.includes('Authentication')) {
+//         router.replace('/(auth)/Login');
+//       }
+//     } finally {
+//       setLoading(false);
+//       setRefreshing(false);
+//     }
+//   };
+
+//   useFocusEffect(
+//     useCallback(() => {
+//       loadAlerts();
+//     }, [])
+//   );
+
+//   const onRefresh = useCallback(() => {
+//     loadAlerts(true);
+//   }, []);
+
+//   /* ==============================
+//      SWIPE ACTIONS
+//   ================================ */
+//   const closeOthers = (id: string) => {
+//     rowRefs.current.forEach((ref, key) => {
+//       if (key !== id) ref?.close();
+//     });
+//   };
+
+//   const deleteItem = async (id: string, anim: Animated.Value) => {
+//     try {
+//       // Mark as read in Backend
+//       await markAsRead(parseInt(id));
+      
+//       // Animate out (Shrink height and fade)
+//       Animated.timing(anim, {
+//         toValue: 0,
+//         duration: 250,
+//         useNativeDriver: false,
+//       }).start(() => {
+//         setAlerts((prev) => prev.filter((item) => item.alert_id.toString() !== id));
+//         rowRefs.current.delete(id);
+//         heightAnims.current.delete(id);
+//       });
+//     } catch (error) {
+//       console.error("Dismiss error", error);
+//       rowRefs.current.get(id)?.close();
+//     }
+//   };
+
+//   /* ==============================
+//      RENDER ROW
+//   ================================ */
+//   const renderItem = ({ item }: { item: AlertItem }) => {
+//     const idStr = item.alert_id.toString();
+//     const icon = getIcon(item.alert_type);
+
+//     // Ensure each item has its own animation value
+//     if (!heightAnims.current.has(idStr)) {
+//       heightAnims.current.set(idStr, new Animated.Value(1));
+//     }
+//     const heightAnim = heightAnims.current.get(idStr)!;
+
+//     return (
+//       <Animated.View 
+//         style={{ 
+//           transform: [{ scaleY: heightAnim }], 
+//           opacity: heightAnim,
+//           // This keeps the layout jumping to a minimum during the shrink
+//           maxHeight: heightAnim.interpolate({
+//             inputRange: [0, 1],
+//             outputRange: [0, 500] 
+//           })
+//         }}
+//       >
+//         <Swipeable
+//           ref={(ref) => { if (ref) rowRefs.current.set(idStr, ref); }}
+//           onSwipeableOpen={() => closeOthers(idStr)}
+//           overshootRight={false}
+//           renderRightActions={() => (
+//             <TouchableOpacity 
+//               style={styles.deleteBtn} 
+//               onPress={() => deleteItem(idStr, heightAnim)}
+//             >
+//               <Ionicons name="trash-outline" size={24} color="#fff" />
+//               <Text style={styles.deleteText}>Dismiss</Text>
+//             </TouchableOpacity>
+//           )}
+//         >
+//           <View style={styles.row}>
+//             {/* Dynamic Icon with light background tint */}
+//             <View style={[styles.iconContainer, { backgroundColor: icon.color + '15' }]}>
+//               <Ionicons name={icon.name as any} size={22} color={icon.color} />
+//             </View>
+
+//             <View style={styles.content}>
+//               <Text style={styles.title}>
+//                 {item.license_plate} • {item.alert_type.replace('_', ' ').toUpperCase()}
+//               </Text>
+//               <Text style={styles.message} numberOfLines={2}>
+//                 {item.message}
+//               </Text>
+//               <Text style={styles.time}>
+//                 {new Date(item.created_at).toLocaleString()}
+//               </Text>
+//             </View>
+            
+//             <Ionicons name="chevron-back" size={14} color="#ddd" />
+//           </View>
+//         </Swipeable>
+//       </Animated.View>
+//     );
+//   };
+
+//   /* ==============================
+//      MAIN VIEW
+//   ================================ */
+//   return (
+//     <GestureHandlerRootView style={{ flex: 1 }}>
+//       <View style={styles.container}>
+//         {loading && !refreshing ? (
+//           <View style={styles.center}>
+//             <ActivityIndicator size="large" color="#3f51b5" />
+//           </View>
+//         ) : (
+//           <FlatList
+//             data={alerts}
+//             keyExtractor={(item) => item.alert_id.toString()}
+//             renderItem={renderItem}
+//             contentContainerStyle={{ padding: 12 }}
+//             refreshControl={
+//               <RefreshControl 
+//                 refreshing={refreshing} 
+//                 onRefresh={onRefresh} 
+//                 colors={['#3f51b5']} 
+//               />
+//             }
+//             ListEmptyComponent={
+//               <View style={styles.center}>
+//                 <Ionicons name="notifications-off-outline" size={50} color="#ccc" />
+//                 <Text style={styles.emptyText}>No alerts found</Text>
+//               </View>
+//             }
+//           />
+//         )}
+//       </View>
+//     </GestureHandlerRootView>
+//   );
+// }
+
+// /* ==============================
+//    STYLES
+// ================================ */
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     backgroundColor: '#f5f5f7',
+//   },
+//   center: {
+//     flex: 1,
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//     marginTop: 50,
+//   },
+//   row: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     backgroundColor: '#fff',
+//     padding: 14,
+//     borderRadius: 14,
+//     marginBottom: 10,
+//     // Shadow/Elevation
+//     elevation: 2,
+//     shadowColor: '#000',
+//     shadowOffset: { width: 0, height: 1 },
+//     shadowOpacity: 0.08,
+//     shadowRadius: 3,
+//   },
+//   iconContainer: {
+//     width: 44,
+//     height: 44,
+//     borderRadius: 12,
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//     marginRight: 14,
+//   },
+//   content: {
+//     flex: 1,
+//   },
+//   title: {
+//     fontWeight: '700',
+//     fontSize: 13,
+//     color: '#1a1a1a',
+//     letterSpacing: 0.2,
+//   },
+//   message: {
+//     fontSize: 13,
+//     color: '#666',
+//     marginTop: 3,
+//     lineHeight: 18,
+//   },
+//   time: {
+//     fontSize: 11,
+//     color: '#999',
+//     marginTop: 6,
+//   },
+//   emptyText: {
+//     color: '#999',
+//     marginTop: 10,
+//     fontSize: 15,
+//   },
+//   deleteBtn: {
+//     backgroundColor: '#FF3B30',
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//     width: 80,
+//     borderRadius: 14,
+//     marginBottom: 10,
+//     marginLeft: 10,
+//   },
+//   deleteText: {
+//     color: '#fff',
+//     fontSize: 10,
+//     fontWeight: 'bold',
+//     marginTop: 4,
+//   },
+// });
+
+
+
+import React, { useRef, useState, useCallback } from 'react';
+import { useFocusEffect, router } from 'expo-router';
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
-  ActivityIndicator,
   TouchableOpacity,
-  Alert,
   Animated,
-  Dimensions,
+  ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
-import { useFocusEffect, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { getAlerts, markAsRead } from '../../src/services/dataService';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3; // 30% of screen = full swipe delete
+import { getAlerts, markAsRead } from '@/src/services/dataService';
 
 /* ==============================
-   TYPE (MATCHES BACKEND RESPONSE)
+   TYPES
 ================================ */
 interface AlertItem {
   alert_id: number;
@@ -29,205 +758,155 @@ interface AlertItem {
   message: string;
   license_plate: string;
   created_at: string;
-  lat?: string;
-  lng?: string;
 }
 
 /* ==============================
-   SCREEN
+   ICON SELECTOR HELPER
 ================================ */
+const getIcon = (type?: string) => {
+  if (!type) {
+    return { name: 'alert-circle-outline', color: '#9e9e9e' };
+  }
+  switch (type.toLowerCase()) {
+    case 'sos':
+      return { name: 'warning-outline', color: '#f44336' };
+    case 'overspeed':
+      return { name: 'speedometer-outline', color: '#ff5722' };
+    case 'geofence':
+      return { name: 'map-outline', color: '#3f51b5' };
+    case 'low_battery':
+      return { name: 'battery-dead-outline', color: '#ff9800' };
+    case 'power_cut':
+      return { name: 'flash-outline', color: '#795548' };
+    default:
+      return { name: 'notifications-outline', color: '#607d8b' };
+  }
+};
+
 export default function AlertsScreen() {
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  // Store refs for each swipeable item
-  const swipeableRefs = useRef<Map<number, Swipeable | null>>(new Map());
+  const [refreshing, setRefreshing] = useState(false);
 
-  // 🔄 Reload alerts when screen is focused
+  const rowRefs = useRef<Map<string, Swipeable>>(new Map());
+  const heightAnims = useRef<Map<string, Animated.Value>>(new Map());
+
+  /* ==============================
+     DATA FETCHING
+  ================================ */
+  const loadAlerts = async (isRefreshing = false) => {
+    if (isRefreshing) setRefreshing(true);
+    else setLoading(true);
+
+    try {
+      const data = await getAlerts();
+      setAlerts(
+        data.map((a: any) => ({
+          ...a,
+          alert_type: a.alert_type ?? 'UNKNOWN',
+        }))
+      );
+    } catch (error: any) {
+      if (error?.message?.includes('Authentication')) {
+        router.replace('/(auth)/Login');
+      }
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
-      const loadAlerts = async () => {
-        setLoading(true);
-        try {
-          const data = await getAlerts();
-          const normalized: AlertItem[] = data.map((a: any) => ({
-            ...a,
-            alert_type: a.alert_type ?? 'UNKNOWN',
-          }));
-          setAlerts(normalized);
-        } catch (error: any) {
-          if (error?.message?.includes('Authentication')) {
-            router.replace('/(auth)/Login');
-          } else {
-            console.error('Alerts load error:', error);
-          }
-        } finally {
-          setLoading(false);
-        }
-      };
       loadAlerts();
     }, [])
   );
 
-  // Dismiss single Alert
-  const handleDismiss = async (alertId: number) => {
+  const onRefresh = useCallback(() => {
+    loadAlerts(true);
+  }, []);
+
+  /* ==============================
+     SWIPE ACTIONS
+  ================================ */
+  const closeOthers = (id: string) => {
+    rowRefs.current.forEach((ref, key) => {
+      if (key !== id) ref?.close();
+    });
+  };
+
+  const deleteItem = async (id: string, anim: Animated.Value) => {
     try {
-      await markAsRead(alertId);
-      // Close the swipeable first
-      swipeableRefs.current.get(alertId)?.close();
-      // Remove the read alert from the list
-      setAlerts((prevAlerts) =>
-        prevAlerts.filter((alert) => alert.alert_id !== alertId)
-      );
-      // Clean up ref
-      swipeableRefs.current.delete(alertId);
+      await markAsRead(parseInt(id));
+      Animated.timing(anim, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: false,
+      }).start(() => {
+        setAlerts((prev) => prev.filter((item) => item.alert_id.toString() !== id));
+        rowRefs.current.delete(id);
+        heightAnims.current.delete(id);
+      });
     } catch (error) {
-      Alert.alert('Error', 'Failed to dismiss alert.');
+      rowRefs.current.get(id)?.close();
     }
-  };
-
-  // --- RENDER RIGHT ACTION (The Delete Button) ---
-  const renderRightActions = (
-    id: number,
-    progress: Animated.AnimatedInterpolation<number>,
-    dragX: Animated.AnimatedInterpolation<number>
-  ) => {
-    // Scale animation for the button
-    const scale = dragX.interpolate({
-      inputRange: [-100, -50, 0],
-      outputRange: [1, 0.8, 0],
-      extrapolate: 'clamp',
-    });
-
-    // Opacity for "Release to delete" indicator
-    const deleteOpacity = dragX.interpolate({
-      inputRange: [-SCREEN_WIDTH, -SWIPE_THRESHOLD, -SWIPE_THRESHOLD + 1],
-      outputRange: [1, 1, 0],
-      extrapolate: 'clamp',
-    });
-
-    // Background color changes when full swipe is reached
-    const backgroundColor = dragX.interpolate({
-      inputRange: [-SCREEN_WIDTH, -SWIPE_THRESHOLD, -SWIPE_THRESHOLD + 1, 0],
-      outputRange: ['#FF3B30', '#FF3B30', '#FF6B60', '#FF6B60'],
-      extrapolate: 'clamp',
-    });
-
-    return (
-      <Animated.View 
-        style={[
-          styles.deleteContainer, 
-          { backgroundColor }
-        ]}
-      >
-        <TouchableOpacity 
-          onPress={() => handleDismiss(id)} 
-          activeOpacity={0.6}
-          style={styles.deleteButton}
-        >
-          <Animated.View style={[styles.deleteContent, { transform: [{ scale }] }]}>
-            <Ionicons name="trash-outline" size={24} color="white" />
-            <Text style={styles.deleteText}>Dismiss</Text>
-          </Animated.View>
-          
-          {/* "Release to delete" indicator */}
-          <Animated.View style={[styles.releaseIndicator, { opacity: deleteOpacity }]}>
-            <Ionicons name="arrow-back" size={18} color="white" />
-            <Text style={styles.releaseText}>Release to delete</Text>
-          </Animated.View>
-        </TouchableOpacity>
-      </Animated.View>
-    );
-  };
-
-  // ICON HANDLER (SAFE)
-  const getIcon = (type?: string) => {
-    if (!type) {
-      return { name: 'alert-circle-outline', color: '#9e9e9e' };
-    }
-
-    switch (type.toLowerCase()) {
-      case 'sos':
-        return { name: 'warning-outline', color: '#f44336' };
-      case 'overspeed':
-        return { name: 'speedometer-outline', color: '#ff5722' };
-      case 'geofence':
-        return { name: 'map-outline', color: '#3f51b5' };
-      case 'low_battery':
-        return { name: 'battery-dead-outline', color: '#ff9800' };
-      case 'power_cut':
-        return { name: 'flash-outline', color: '#795548' };
-      default:
-        return { name: 'notifications-outline', color: '#607d8b' };
-    }
-  };
-
-  const renderItem = ({ item }: { item: AlertItem }) => {
-    const icon = getIcon(item.alert_type);
-
-    return (
-      <Swipeable
-        ref={(ref) => {
-          if (ref) {
-            swipeableRefs.current.set(item.alert_id, ref);
-          }
-        }}
-        renderRightActions={(progress, dragX) =>
-          renderRightActions(item.alert_id, progress, dragX)
-        }
-        // KEY SETTINGS FOR SWIPE BEHAVIOR:
-        rightThreshold={40}              // 👈 Low threshold to OPEN the button easily
-        friction={2}                      // 👈 Controls swipe resistance
-        overshootRight={false}            // 👈 Prevents overshoot past the button
-        overshootFriction={8}             // 👈 Extra friction at the end
-        
-        // 🎯 THIS IS THE MAGIC - Full swipe triggers delete
-        onSwipeableWillOpen={(direction) => {
-          // Only trigger on intentional full swipe
-          if (direction === 'right') {
-            // Short delay to let animation complete
-            setTimeout(() => {
-              handleDismiss(item.alert_id);
-            }, 100);
-          }
-        }}
-      >
-        <View style={styles.alertCard}>
-          <Ionicons
-            name={icon.name as any}
-            size={26}
-            color={icon.color}
-            style={styles.icon}
-          />
-          <View style={styles.textDetails}>
-            <Text style={styles.alertTitle}>
-              {item.license_plate} • {item.alert_type.replace('_', ' ')}
-            </Text>
-            <Text style={styles.alertMessage}>{item.message}</Text>
-            <Text style={styles.alertTime}>
-              {new Date(item.created_at).toLocaleString()}
-            </Text>
-          </View>
-          
-          {/* Swipe hint indicator */}
-          <Ionicons name="chevron-back" size={18} color="#ccc" />
-        </View>
-      </Swipeable>
-    );
   };
 
   /* ==============================
-     LOADING STATE
+     RENDER ROW
   ================================ */
-  if (loading) {
+  const renderItem = ({ item }: { item: AlertItem }) => {
+    const idStr = item.alert_id.toString();
+    const icon = getIcon(item.alert_type);
+
+    if (!heightAnims.current.has(idStr)) {
+      heightAnims.current.set(idStr, new Animated.Value(1));
+    }
+    const heightAnim = heightAnims.current.get(idStr)!;
+
     return (
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color="#3f51b5" />
-        </View>
-      </GestureHandlerRootView>
+      <Animated.View 
+        style={{ 
+          transform: [{ scaleY: heightAnim }], 
+          opacity: heightAnim,
+          maxHeight: heightAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 500] 
+          })
+        }}
+      >
+        <Swipeable
+          ref={(ref) => { if (ref) rowRefs.current.set(idStr, ref); }}
+          onSwipeableOpen={() => closeOthers(idStr)}
+          overshootRight={false}
+          renderRightActions={() => (
+            <TouchableOpacity 
+              style={styles.deleteBtn} 
+              onPress={() => deleteItem(idStr, heightAnim)}
+            >
+              <Ionicons name="trash-outline" size={24} color="#fff" />
+              <Text style={styles.deleteText}>Dismiss</Text>
+            </TouchableOpacity>
+          )}
+        >
+          <View style={styles.row}>
+            <View style={[styles.iconContainer, { backgroundColor: icon.color + '15' }]}>
+              <Ionicons name={icon.name as any} size={22} color={icon.color} />
+            </View>
+
+            <View style={styles.content}>
+              <Text style={styles.title}>
+                {item.license_plate} • {item.alert_type.replace('_', ' ').toUpperCase()}
+              </Text>
+              <Text style={styles.message} numberOfLines={2}>{item.message}</Text>
+              <Text style={styles.time}>{new Date(item.created_at).toLocaleString()}</Text>
+            </View>
+            <Ionicons name="chevron-back" size={14} color="#ddd" />
+          </View>
+        </Swipeable>
+      </Animated.View>
     );
-  }
+  };
 
   /* ==============================
      MAIN VIEW
@@ -235,135 +914,112 @@ export default function AlertsScreen() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
-        {/* Header hint */}
-        <View style={styles.hintContainer}>
-          <Text style={styles.hintText}>
-            ← Swipe left to dismiss alerts
-          </Text>
-        </View>
         
-        <FlatList
-          data={alerts}
-          keyExtractor={(item) => item.alert_id.toString()}
-          renderItem={renderItem}
-          ListEmptyComponent={
-            <View style={styles.empty}>
-              <Ionicons
-                name="notifications-off-outline"
-                size={50}
-                color="#ccc"
-              />
-              <Text style={styles.emptyText}>No alerts found</Text>
-            </View>
-          }
-        />
+        {/* 1. Header Hint Container */}
+        {alerts.length > 0 && (
+          <View style={styles.hintContainer}>
+            <Text style={styles.hintText}>
+              ← Swipe left to dismiss alerts
+            </Text>
+          </View>
+        )}
+
+        {loading && !refreshing ? (
+          <View style={styles.center}>
+            <ActivityIndicator size="large" color="#3f51b5" />
+          </View>
+        ) : (
+          <FlatList
+            data={alerts}
+            keyExtractor={(item) => item.alert_id.toString()}
+            renderItem={renderItem}
+            contentContainerStyle={{ padding: 12, paddingBottom: 40 }}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#3f51b5']} />
+            }
+            // 2. Styled Empty Component
+            ListEmptyComponent={
+              <View style={styles.empty}>
+                <Ionicons name="notifications-off-outline" size={60} color="#ccc" />
+                <Text style={styles.emptyText}>No alerts found</Text>
+                <Text style={styles.emptySubText}>You are all caught up!</Text>
+              </View>
+            }
+          />
+        )}
       </View>
     </GestureHandlerRootView>
   );
 }
 
-/* ==============================
-   STYLES
-================================ */
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  container: { flex: 1, backgroundColor: '#f5f5f7' },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  
+  // Hint Styles
   hintContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    padding: 8,
     backgroundColor: '#e8eaf6',
   },
   hintText: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#5c6bc0',
     textAlign: 'center',
+    fontWeight: '500',
   },
-  alertCard: {
+
+  row: {
     flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#fff',
-    padding: 16,
-    marginHorizontal: 10,
-    marginTop: 10,
-    borderRadius: 10,
+    padding: 14,
+    borderRadius: 14,
+    marginBottom: 10,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    alignItems: 'center',
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
   },
-  icon: {
+  iconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: 14,
   },
-  textDetails: {
-    flex: 1,
-  },
-  alertTitle: {
-    fontWeight: 'bold',
-    fontSize: 14,
-    color: '#333',
-    textTransform: 'uppercase',
-  },
-  alertMessage: {
-    fontSize: 13,
-    color: '#666',
-    marginVertical: 4,
-  },
-  alertTime: {
-    fontSize: 11,
-    color: '#999',
-  },
+  content: { flex: 1 },
+  title: { fontWeight: '700', fontSize: 13, color: '#1a1a1a' },
+  message: { fontSize: 13, color: '#666', marginTop: 3 },
+  time: { fontSize: 11, color: '#999', marginTop: 6 },
+
+  // Empty State Styles
   empty: {
     alignItems: 'center',
-    marginTop: 120,
+    justifyContent: 'center',
+    marginTop: 100,
   },
   emptyText: {
-    color: '#999',
-    marginTop: 10,
-    fontSize: 16,
-  },
-  // Delete button styles
-  deleteContainer: {
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-    marginTop: 10,
-    marginRight: 10,
-    borderRadius: 10,
-    minWidth: 100,
-  },
-  deleteButton: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    height: '100%',
-    minWidth: 100,
-  },
-  deleteContent: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  deleteText: {
-    color: 'white',
+    marginTop: 15,
+    fontSize: 18,
     fontWeight: '600',
-    marginTop: 4,
-    fontSize: 12,
+    color: '#333',
   },
-  releaseIndicator: {
-    position: 'absolute',
-    right: 10,
-    flexDirection: 'row',
+  emptySubText: {
+    marginTop: 5,
+    fontSize: 14,
+    color: '#999',
+  },
+
+  deleteBtn: {
+    backgroundColor: '#FF3B30',
+    justifyContent: 'center',
     alignItems: 'center',
+    width: 80,
+    borderRadius: 14,
+    marginBottom: 10,
+    marginLeft: 10,
   },
-  releaseText: {
-    color: 'white',
-    fontSize: 10,
-    marginLeft: 4,
-  },
+  deleteText: { color: '#fff', fontSize: 10, fontWeight: 'bold', marginTop: 4 },
 });

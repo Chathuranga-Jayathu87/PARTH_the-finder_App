@@ -17,7 +17,7 @@ router.get('/alerts', async (req, res) => {
             SELECT a.*, v.license_plate 
             FROM alerts a 
             JOIN vehicles v ON a.vehicle_id = v.vehicle_id
-            WHERE v.user_id = ? 
+            WHERE v.user_id = ? AND a.is_read = 0 
             ORDER BY a.created_at DESC`;
 
         // 🚀 Using await with mysql2/promise

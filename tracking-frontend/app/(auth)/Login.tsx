@@ -1,14 +1,104 @@
+// import React, { useState } from 'react';
+// import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
+// import { Link, router } from 'expo-router';   
+// import { login } from '../../src/services/authService';
+// import { ColorProperties } from 'react-native-reanimated/lib/typescript/Colors';
+
+// export default function Login() {
+//     const [email, setEmail] = useState('');
+//     const [password, setPassword] = useState('');
+//     const [loading, setLoading] = useState(false);
+
+//     const handleLogin = async () => {
+//         if (!email || !password) {
+//             Alert.alert('Error', 'Please enter both fields.');
+//             return;
+//         }
+
+//         setLoading(true);
+//         try {
+//             const response = await login(email, password);
+//             await AsyncStorage.setItem('token', response.token);
+//             Alert.alert("Success", "Logged in!");
+
+//             router.replace('/(app)');// Navigate to main app layout
+//         } catch (err) {
+//             Alert.alert("Login Failed.", (err as Error).message);
+//         } finally{
+//         setLoading(false);
+//         }
+        
+//     };
+
+//     return (
+//         <View style={styles.container}>
+//             <Text style={styles.title}>GPS Login</Text>
+
+//             <TextInput
+//                 style={styles.input}
+//                 placeholder="Email"
+//                 keyboardType="email-address"
+//                 placeholderTextColor="#888"
+//                 value={email}
+//                 onChangeText={setEmail}
+//             />
+
+//             <TextInput
+//                 style={styles.input}
+//                 placeholder="Password"
+//                 placeholderTextColor="#888"
+//                 value={password}
+//                 onChangeText={setPassword}
+//                 secureTextEntry
+//             />
+
+//             <Button title="Login" onPress={handleLogin} disabled={loading} />
+//             <Text>Not registered?<Link href="/(auth)/Register" style={styles.span}> Sign up here.</Link></Text>
+
+//             {loading && <ActivityIndicator style={{ marginTop: 10 }} />}
+//         </View>
+//     );
+// }
+
+// const styles = StyleSheet.create({
+//     container: { flex: 1, justifyContent: 'center', padding: 20 },
+//     title: { fontSize: 24, textAlign: 'center', marginBottom: 20 },
+//     input: {
+//         borderWidth: 1,
+//         borderColor: '#ccc',
+//         marginBottom: 10,
+//         borderRadius: 5,
+//         padding: 10,
+//         backgroundColor: '#fff',
+//         color: '#000',
+//     },
+//     span: { color: 'red' },
+// });
+
+
+
+
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  TouchableOpacity, 
+  StyleSheet, 
+  Alert, 
+  ActivityIndicator 
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Link, router } from 'expo-router';   
+import { Link, router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons'; // Import icons
 import { login } from '../../src/services/authService';
-import { ColorProperties } from 'react-native-reanimated/lib/typescript/Colors';
 
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false); // Eye toggle state
 
     const handleLogin = async () => {
         if (!email || !password) {
@@ -20,58 +110,175 @@ export default function Login() {
         try {
             const response = await login(email, password);
             await AsyncStorage.setItem('token', response.token);
-            Alert.alert("Success", "Logged in!");
-
-            router.replace('/(app)');// Navigate to main app layout
+            // Optional: Remove success alert for smoother UX
+            router.replace('/(app)'); 
         } catch (err) {
-            Alert.alert("Login Failed.", (err as Error).message);
-        } finally{
-        setLoading(false);
+            Alert.alert("Login Failed", (err as Error).message);
+        } finally {
+            setLoading(false);
         }
-        
     };
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>GPS Login</Text>
+            <View style={styles.header}>
+                <Ionicons name="location-sharp" size={50} color="#3f51b5" />
+                <Text style={styles.title}>GPS Tracker</Text>
+                <Text style={styles.subtitle}>Welcome back, please login</Text>
+            </View>
 
-            <TextInput
-                style={styles.input}
-                placeholder="Email"
-                keyboardType="email-address"
-                placeholderTextColor="#888"
-                value={email}
-                onChangeText={setEmail}
-            />
+            {/* Email Input */}
+            <View style={styles.inputContainer}>
+                <Ionicons name="mail-outline" size={20} color="#888" style={styles.inputIcon} />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Email Address"
+                    keyboardType="email-address"
+                    placeholderTextColor="#888"
+                    autoCapitalize="none"
+                    value={email}
+                    onChangeText={setEmail}
+                />
+            </View>
 
-            <TextInput
-                style={styles.input}
-                placeholder="Password"
-                placeholderTextColor="#888"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-            />
+            {/* Password Input with Eye */}
+            <View style={styles.inputContainer}>
+                <Ionicons name="lock-closed-outline" size={20} color="#888" style={styles.inputIcon} />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Password"
+                    placeholderTextColor="#888"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={!showPassword}
+                />
+                <TouchableOpacity 
+                    onPress={() => setShowPassword(!showPassword)}
+                    style={styles.eyeIcon}
+                >
+                    <Ionicons 
+                        name={showPassword ? "eye-off-outline" : "eye-outline"} 
+                        size={20} 
+                        color="#888" 
+                    />
+                </TouchableOpacity>
+            </View>
 
-            <Button title="Login" onPress={handleLogin} disabled={loading} />
-            <Text>Not registered?<Link href="/(auth)/Register" style={styles.span}> Sign up here.</Link></Text>
+            {/* Forgot Password Link */}
+            <TouchableOpacity 
+                onPress={() => router.push('/(auth)/frogot-password')} 
+                style={styles.forgotContainer}
+            >
+                <Text style={styles.forgotText}>Forgot Password?</Text>
+            </TouchableOpacity>
 
-            {loading && <ActivityIndicator style={{ marginTop: 10 }} />}
+            {/* Login Button */}
+            <TouchableOpacity 
+                style={[styles.loginButton, loading && { opacity: 0.7 }]} 
+                onPress={handleLogin} 
+                disabled={loading}
+            >
+                {loading ? (
+                    <ActivityIndicator color="#fff" />
+                ) : (
+                    <Text style={styles.loginButtonText}>Login</Text>
+                )}
+            </TouchableOpacity>
+
+            <View style={styles.footer}>
+                <Text style={styles.footerText}>Not registered? </Text>
+                <Link href="/(auth)/Register" asChild>
+                    <TouchableOpacity>
+                        <Text style={styles.signUpText}>Sign up here.</Text>
+                    </TouchableOpacity>
+                </Link>
+            </View>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, justifyContent: 'center', padding: 20 },
-    title: { fontSize: 24, textAlign: 'center', marginBottom: 20 },
-    input: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        marginBottom: 10,
-        borderRadius: 5,
-        padding: 10,
-        backgroundColor: '#fff',
-        color: '#000',
+    container: { 
+        flex: 1, 
+        justifyContent: 'center', 
+        padding: 30,
+        backgroundColor: '#f9f9f9' 
     },
-    span: { color: 'red' },
+    header: {
+        alignItems: 'center',
+        marginBottom: 40,
+    },
+    title: { 
+        fontSize: 28, 
+        fontWeight: 'bold', 
+        color: '#333',
+        marginTop: 10
+    },
+    subtitle: {
+        fontSize: 14,
+        color: '#666',
+        marginTop: 5,
+    },
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 12,
+        marginBottom: 15,
+        paddingHorizontal: 15,
+        height: 55,
+    },
+    inputIcon: {
+        marginRight: 10,
+    },
+    input: {
+        flex: 1,
+        color: '#000',
+        fontSize: 16,
+    },
+    eyeIcon: {
+        padding: 5,
+    },
+    forgotContainer: {
+        alignSelf: 'flex-end',
+        marginBottom: 25,
+    },
+    forgotText: {
+        color: '#3f51b5',
+        fontWeight: '600',
+        fontSize: 14,
+    },
+    loginButton: {
+        backgroundColor: '#3f51b5',
+        height: 55,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 3,
+        shadowColor: '#3f51b5',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+    },
+    loginButtonText: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    footer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 30,
+    },
+    footerText: {
+        color: '#666',
+        fontSize: 14,
+    },
+    signUpText: {
+        color: '#f44336',
+        fontWeight: 'bold',
+        fontSize: 14,
+    },
 });
