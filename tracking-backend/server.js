@@ -15,6 +15,7 @@ const registerdVehicles = require('./routes/vehicle.registerd.Routes');
 const alertsRoutes = require('./routes/alerts.routes');
 const usersRoutes = require('./routes/user.routes');
 const expoTokenRoutes = require('./routes/expo_token.routes');
+const frogortPasswordRoutes = require('./routes/user.frogotpassword.routes');
 
 
 const app = express();
@@ -26,12 +27,19 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // API Routes
+
+//PUBLIC TOKEN NOT REQUIRED
+app.use('/api/auth', frogortPasswordRoutes); //http://172.20.10.3:5000/api/auth/forgot-password
+//PROTECTED TOKEN REQUIRED
 app.use('/api/auth', authRoutes);      // http://172.20.10.3:5000/api/auth/login  //http://172.20.10.3:5000/api/auth/register
 app.use('/api/vehicles', vehicleRoutes);  //http://172.20.10.3:5000/api/vehicles/register      http://172.20.10.3:5000/api/vehicles/id   
 app.use('/api/v1',registerdVehicles);     //http://172.20.10.3:5000/api/v1/vehicles
 app.use('/api/v1',alertsRoutes);  //http://172.20.10.3:5000/api/v1/alerts
 app.use('/api/users', usersRoutes);  //http://172.20.10.3:5000/api/users/update-profile   //http://172.20.10.3:5000/api/users/profile  //http://172.20.10.30:5000/api/users/change-password  //http://172.20.10.30:5000/api/users/settings/notification
 app.use('/api/users', expoTokenRoutes); //http://172.20.10.3:5000/api/users/save-token
+
+
+
 
 // Test route
 app.get('/', (req, res) => {

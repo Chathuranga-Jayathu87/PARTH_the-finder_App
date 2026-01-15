@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import {requestPasswordReset} from '@/src/services/authService';
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState('');
@@ -25,10 +26,9 @@ export default function ForgotPassword() {
         setLoading(true);
         try {
             // Replace this with your actual API call: await requestPasswordReset(email);
-            console.log("Requesting reset for:", email);
+            await requestPasswordReset(email);
             
-            // Simulating API delay
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            
             
             setSubmitted(true);
         } catch (err) {

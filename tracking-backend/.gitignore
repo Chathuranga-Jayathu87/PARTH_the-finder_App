@@ -1,6 +1,9 @@
 # local env files
-.env*.local
+.env
 #image files
 *.png
 *.jpg
 *.jpeg
+
+# module files
+node_modules/

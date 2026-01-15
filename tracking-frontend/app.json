@@ -9,6 +9,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "bundleIdentifier": "com.chathuranga_jayathu.trackingfrontend",
       "supportsTablet": true
     },
     "android": {
@@ -20,7 +21,18 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.chathuranga_jayathu.trackingfrontend"
+      "package": "com.chathuranga_jayathu.trackingfrontend",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "trackingfrontend"
+            }
+          ],
+          "category": ["DEFAULT", "BROWSABLE"]
+        }
+      ]
     },
     "web": {
       "output": "static",
