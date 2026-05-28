@@ -3,7 +3,7 @@ import { io, Socket } from "socket.io-client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getAuthToken } from "../services/authService";
 
-const SOCKET_URL = "http://172.20.10.3:5000";
+const SOCKET_URL = "http://169.254.16.170:5000";
 
 export interface LiveVehicleData {
   speed?: number;
@@ -25,9 +25,8 @@ export function useVehicleSocket(vehicleId?: string) {
     let isMounted = true;
 
     const connectSocket = async () => {
-      
       const token = await getAuthToken();
-        //const token = await AsyncStorage.getItem("auth_token");
+      //const token = await AsyncStorage.getItem("auth_token");
       if (!token) {
         console.warn("No auth token found for socket");
         return;

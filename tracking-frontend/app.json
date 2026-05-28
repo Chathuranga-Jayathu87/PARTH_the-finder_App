@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "tracking-frontend",
+    "name": "PathFinder",
     "slug": "tracking-frontend",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -18,13 +18,20 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
+        "foregroundImage": "./assets/images/android-icon-monochrome.png",
+        "backgroundImage": "./assets/images/android-icon-monochrome.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.chathuranga_jayathu.trackingfrontend",
+      "usesCleartextTraffic": true,
+      "googleServicesFile": "./google-services.json",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyA72rhNB4QbUvM7Yrv8CxzrZDi1NL_QYvM"
+        }
+      },
       "intentFilters": [
         {
           "action": "VIEW",
@@ -33,10 +40,7 @@
               "scheme": "trackingfrontend"
             }
           ],
-          "category": [
-            "DEFAULT",
-            "BROWSABLE"
-          ]
+          "category": ["DEFAULT", "BROWSABLE"]
         }
       ]
     },
@@ -58,7 +62,8 @@
           }
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

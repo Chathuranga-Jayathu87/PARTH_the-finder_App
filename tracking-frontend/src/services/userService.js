@@ -1,7 +1,7 @@
 // src/services/userService.js
 import { getAuthToken } from "./authService";
 
-const BASE_URL = "http://172.20.10.3:5000/api/users";
+const BASE_URL = "http://169.254.16.170:5000/api/users";
 
 export const updateProfile = async (name, phone, imageUri) => {
   try {

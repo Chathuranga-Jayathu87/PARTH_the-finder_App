@@ -6,7 +6,7 @@
 // // For iOS Simulator, use 'http://localhost' or 'http://127.0.0.1'.
 // //const API_BASE_URL = 'http://10.0.2.2:3000/api/v1'; // Adjust if needed
 
-// const API_BASE_URL = 'http://172.20.10.3:5000/api/auth'; // Adjust if needed
+// const API_BASE_URL = 'http://169.254.16.170:5000/api/auth'; // Adjust if needed
 
 // export const login = async (email, password) => {
 //     try {
@@ -65,8 +65,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // ⚠️ IMPORTANT: Verify this URL matches your Node.js server's IP and port.
-// const API_BASE_URL = 'http://172.20.10.3:5000/api/auth';
-const API_BASE_URL = "http://172.20.10.3:5000/api/auth"; // Using your provided URL
+// const API_BASE_URL = 'http://169.254.16.170:5000/api/auth';
+const API_BASE_URL = "http://169.254.16.170:5000/api/auth"; // Using your provided URL
 const TOKEN_KEY = "authToken"; // Key for AsyncStorage
 
 // -------------------------------------------------------------
@@ -107,7 +107,7 @@ export const clearAuthToken = async () => {
 export const login = async (email, password) => {
   try {
     const response = await fetch(`${API_BASE_URL}/login`, {
-      //http://172.20.10.3:5000/api/auth/login
+      //http://169.254.16.170:5000/api/auth/login
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -142,7 +142,7 @@ export const login = async (email, password) => {
 export const register = async (name, email, password, phone) => {
   try {
     const response = await fetch(`${API_BASE_URL}/register`, {
-      //http://172.20.10.3:5000/api/auth/register
+      //http://169.254.16.170:5000/api/auth/register
       method: "POST",
       headers: {
         "Content-Type": "application/json",

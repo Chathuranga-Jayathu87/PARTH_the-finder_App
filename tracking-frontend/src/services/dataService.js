@@ -1,8 +1,8 @@
 // src/services/dataService.js
 
 import { getAuthToken } from "./authService"; // Use the function we just created
-// const API_BASE_URL = 'http://172.20.10.3:5000/api/data';
-const API_BASE_URL = "http://172.20.10.3:5000/api/v1"; // Assuming a common data API base
+// const API_BASE_URL = 'http://169.254.16.170:5000/api/data';
+const API_BASE_URL = "http://169.254.16.170:5000/api/v1"; // Assuming a common data API base
 
 // --- Helper function to prepare authenticated fetch headers ---
 const getSecuredHeaders = async () => {
@@ -24,7 +24,7 @@ export const getRegisteredVehicles = async () => {
     console.log(headers);
     // This endpoint will query the 'vehicles' table WHERE user_id = LOGGED_IN_USER_ID
     const response = await fetch(`${API_BASE_URL}/vehicles`, {
-      //http://172.20.10.3:5000/api/v1/vehicles
+      //http://169.254.16.170:5000/api/v1/vehicles
       method: "GET",
       headers: headers,
     });

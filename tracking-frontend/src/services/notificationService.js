@@ -1,4 +1,4 @@
-const BASE_URL = "http://172.20.10.3:5000/api/users";
+const BASE_URL = "http://169.254.16.170:5000/api/users";
 
 export const saveExpoPushToken = async (token, jwt) => {
   console.log("💾 Saving Expo Push Token to backend:", token);

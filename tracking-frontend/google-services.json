@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "317185747543",
+    "project_id": "vehicle-tracker-notification",
+    "storage_bucket": "vehicle-tracker-notification.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:317185747543:android:66dd17d7bf045327db5112",
+        "android_client_info": {
+          "package_name": "com.chathuranga_jayathu.trackingfrontend"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPJQXisWLRULdfr6MHEch_Na9f7QUZTHY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
