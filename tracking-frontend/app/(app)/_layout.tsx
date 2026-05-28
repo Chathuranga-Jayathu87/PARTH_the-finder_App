@@ -1,13 +1,18 @@
 // app/(app)/_layout.tsx
-import React from 'react';
+import React ,{ useEffect }from 'react';
 import { Drawer } from 'expo-router/drawer';
 import { View, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import CustomDrawerContent from '../../components/CustomDrawerContent'; // We'll create this next
-import { DrawerNavigationProp } from '@react-navigation/drawer';
+import { DrawerContent, DrawerNavigationProp } from '@react-navigation/drawer';
 import { ParamListBase } from '@react-navigation/native';
-import { router } from 'expo-router';
-
+import { router, Stack } from 'expo-router';
+import { UserProvider } from '../../src/context/UserContext';
+import { registerForPushNotificationsAsync } from '../../src/hooks/usePushNotifications';
+import { saveExpoPushToken } from '../../src/services/notificationService';
+import { getAuthToken } from '@/src/services/authService';
+import {useNotificationNavigation} from '../../src/hooks/useNotificationNavigation';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 type SidebarButtonProps = {
   navigation: DrawerNavigationProp<ParamListBase>;
 };
@@ -34,8 +39,35 @@ const SidebarButton = ({ navigation }: SidebarButtonProps) =>(
 );
 
 
-export default function DrawerLayout() {
-  return (
+ function DrawerLayout() {
+
+  useNotificationNavigation();
+
+  useEffect(() => {
+    const registerToken = async () => {
+      try {
+        // 1️⃣ Get JWT (async)
+        const jwt = await getAuthToken();
+        if (!jwt) return;
+
+        // 2️⃣ Get Expo Push Token (async)
+        const expoToken = await registerForPushNotificationsAsync();
+        if (!expoToken) return;
+
+        // 3️⃣ Send both to server
+        await saveExpoPushToken(expoToken, jwt);
+
+        console.log("✅ Expo Token registered successfully:", expoToken);
+
+      } catch (err) {
+        console.error("Failed to register Expo Push Token:", err);
+      }
+    };
+     registerToken();
+}, []);
+
+return (
+  <GestureHandlerRootView style={{ flex: 1 }}>
     <Drawer 
       screenOptions={{
         headerTintColor: '#3f51b5', // Color of header text/icons
@@ -216,6 +248,125 @@ export default function DrawerLayout() {
         drawerItemStyle:{display:'none'},
       }}
       />
-    </Drawer>
+
+
+      <Drawer.Screen
+      name="profile/edit"
+      options={{
+        title: 'Profile Edit',
+        headerStyle: {height:120},
+        headerLeft: () => (
+        <TouchableOpacity style={{marginLeft:15}} onPress={() => router.replace("/(app)/settings")}>
+          <View
+                style={{
+                  width: 45,
+                  height: 45,
+                  borderRadius: 20,
+                  backgroundColor: '#e0e0e0',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+          <Ionicons name="chevron-back" size={24} />
+          </View>
+        </TouchableOpacity>
+        ),
+        drawerItemStyle:{display:'none'},
+      }}
+      />
+
+
+      <Drawer.Screen
+      name="settings/change-password"
+      options={{
+        title: 'Change Password',
+        headerStyle: {height:120},
+        headerLeft: () => (
+        <TouchableOpacity style={{marginLeft:15}} onPress={() => router.replace("/(app)/settings")}>
+          <View
+                style={{
+                  width: 45,
+                  height: 45,
+                  borderRadius: 20,
+                  backgroundColor: '#e0e0e0',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+          <Ionicons name="chevron-back" size={24} />
+          </View>
+        </TouchableOpacity>
+        ),
+        drawerItemStyle:{display:'none'},
+      }}
+      />
+
+      <Drawer.Screen
+      name="settings/notification"
+      options={{
+        title: 'Notification Settings',
+        headerStyle: {height:120},
+        headerLeft: () => (
+        <TouchableOpacity style={{marginLeft:15}} onPress={() => router.replace("/(app)/settings")}>
+          <View
+                style={{
+                  width: 45,
+                  height: 45,
+                  borderRadius: 20,
+                  backgroundColor: '#e0e0e0',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+          <Ionicons name="chevron-back" size={24} />
+          </View>
+        </TouchableOpacity>
+        ),
+        drawerItemStyle:{display:'none'},
+      }}
+      />
+
+      <Drawer.Screen
+      name="alerts/[id]"
+      options={{
+        title: 'Alert Details',
+        headerStyle: {height:120},
+        headerLeft: () => (
+        <TouchableOpacity style={{marginLeft:15}} onPress={() => router.replace("/(app)/alerts")}>
+          <View
+                style={{
+                  width: 45,
+                  height: 45,
+                  borderRadius: 20,
+                  backgroundColor: '#e0e0e0',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+          <Ionicons name="chevron-back" size={24} />
+          </View>
+        </TouchableOpacity>
+        ),
+        drawerItemStyle:{display:'none'},
+      }}
+      />
+
+      </Drawer>
+    </GestureHandlerRootView>
+
+
+
+
+
+
+  
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <UserProvider>
+      <DrawerLayout />
+    </UserProvider>
   );
 }

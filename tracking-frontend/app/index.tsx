@@ -11,7 +11,7 @@ const loadFonts = () => {
     // Note: It's better to use relative paths like '../assets/fonts/...' 
     // instead of absolute paths like 'D:/Project/...'
     return Font.loadAsync({
-        [FONT_NAME]: require('D:/Project/Tracker_app/tracking-frontend/assets/font/PlaywriteNO-Regular.ttf'), 
+        [FONT_NAME]: require('../assets/font/PlaywriteNO-Regular.ttf'), 
     });
 };
 

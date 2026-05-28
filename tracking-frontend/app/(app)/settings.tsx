@@ -1,26 +1,23 @@
 // app/(app)/settings.tsx
 
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { clearAuthToken } from '@/src/services/authService'; 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router'; 
 
 // --- SECTION DATA ---
 const userSettings = [
-    { id: '1', title: 'Update Profile', icon: 'person-outline', action: () => Alert.alert('Profile', 'Navigate to Profile Edit Screen') },
-    { id: '2', title: 'Change Password', icon: 'lock-closed-outline', action: () => Alert.alert('Security', 'Navigate to Password Change Screen') },
+    { id: '1', title: 'Update Profile', icon: 'person-outline', action: () => router.push('/(app)/profile/edit')},
+    { id: '2', title: 'Change Password', icon: 'lock-closed-outline', action: () => router.push('/(app)/settings/change-password') },
     { id: '3', title: 'Two-Factor Authentication', icon: 'shield-checkmark-outline', action: () => Alert.alert('Security', 'Navigate to 2FA Setup') },
 ];
 
-const appSettings = [
-    { id: '4', title: 'Notification Preferences', icon: 'notifications-outline', action: () => Alert.alert('App', 'Navigate to Notification Settings') },
-    { id: '5', title: 'Clear Cache', icon: 'trash-outline', action: () => Alert.alert('App', 'Clear app cache operation') },
-];
 
 const aboutItems = [
-    { id: '6', title: 'Privacy Policy', icon: 'document-text-outline', action: () => Alert.alert('Info', 'Open Privacy Policy link') },
-    { id: '7', title: 'Terms of Service', icon: 'receipt-outline', action: () => Alert.alert('Info', 'Open Terms link') },
+    { id: '6', title: 'Privacy Policy', icon: 'document-text-outline', action: () => Linking.openURL('https://example.com/privacy').catch(() => Alert.alert('Error', 'Failed to open privacy policy.')) },
+    { id: '7', title: 'Terms of Service', icon: 'receipt-outline', action: () => Linking.openURL('https://example.com/terms').catch(() => Alert.alert('Error', 'Failed to load terms.')) },
     // ⚠️ The Logout action is typically placed here or handled by the Drawer
     // { id: '8', title: 'Logout', icon: 'log-out-outline', action: handleLogout },
 ];
@@ -56,9 +53,34 @@ export default function SettingsScreen() {
     
     // In a final app, the main Logout logic from CustomDrawerContent.js would be repeated here or called via context
      const handleLogout = async () => {
-         await clearAuthToken();
+            await clearAuthToken();
          router.replace('/(auth)/Login');
      };
+
+
+     const handleClearCache = async () => {
+        try {
+        // This clears all local storage except your auth token (if you want to keep them logged in)
+        const keys = await AsyncStorage.getAllKeys();
+        const filteredKeys = keys.filter(key => key !== 'userToken'); 
+        await AsyncStorage.multiRemove(filteredKeys);
+        
+        Alert.alert('Success', 'App cache has been cleared.');
+    } catch (error) {
+        Alert.alert('Error', 'Failed to clear cache.');
+    }
+
+    }
+
+    const appSettings = [
+    { id: '4', title: 'Notification Preferences', icon: 'notifications-outline', action: () => router.push('/(app)/settings/notification') },
+    { id: '5', title: 'Clear Cache', icon: 'trash-outline', action: () => Alert.alert('Clear Cache', 'Are you sure you want to clear the app cache?', [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Clear', onPress: () => handleClearCache(), style: 'destructive' }
+    ]), },
+];
+
+
 
     return (
         <ScrollView style={styles.container}>
