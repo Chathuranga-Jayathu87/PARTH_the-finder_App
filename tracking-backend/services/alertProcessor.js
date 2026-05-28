@@ -1,4 +1,4 @@
-const db = require('../config/db');
+const db = require('../config/db'); // ඔයාගේ නිවැරදි db.js path එක දාන්න
 const { sendPushNotification } = require('./notificationService'); 
 
 // Map tracker alarm types to our database column names
@@ -19,22 +19,26 @@ const processAlert = async (userId, vehicleid, alarmType, lat, lng) => {
         console.log(lat, lng);
 
         // 1. Log to Alerts History (Always do this)
-        await db.execute(
-            "INSERT INTO alerts (user_id, vehicle_id, alert_type, message, lat, lng, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())",
+        // 💡 ? වෙනුවට $1 සිට $6 දක්වා placeholders දමා NOW() වෙනුවට CURRENT_TIMESTAMP යොදා ඇත.
+        await db.query(
+            "INSERT INTO alerts (user_id, vehicle_id, alert_type, message, lat, lng, created_at) VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP)",
             [userId, vehicleid, alarmType, config.body, lat, lng]
         );
 
         // 2. Check User Preferences from user_settings table
-        const [rows] = await db.execute(
-            `SELECT ${config.column} FROM user_settings WHERE user_id = ?`,
+        // 💡 ? වෙනුවට $1 දමා [rows] ලෙස destructure කර ඇත.
+        const { rows } = await db.query(
+            `SELECT ${config.column} FROM user_settings WHERE user_id = $1`,
             [userId]
         );
 
-        const isEnabled = rows.length > 0 ? rows[0][config.column] : 1; // Default to 1 (On)
+        // 💡 Postgres වල boolean (true/false) එන නිසා default එක true (On) ලෙස සකසා ඇත.
+        const isEnabled = rows.length > 0 ? rows[0][config.column] : true; 
 
         // 3. Send Push Notification if enabled
-        if (isEnabled === 1) {
-          await sendPushNotification(userId, {
+        // 💡 true ද කියා බැලීමට (false නොවේ නම් හෝ true නම්) check එක වෙනස් කර ඇත.
+        if (isEnabled !== false) {
+            await sendPushNotification(userId, {
                 title: config.title,
                 body: config.body,
                 data: {
@@ -47,7 +51,7 @@ const processAlert = async (userId, vehicleid, alarmType, lat, lng) => {
             console.log(`[Push] Notification sent for ${alarmType} to User ${userId}`);
         }
     } catch (err) {
-        console.error("Alert Processing Error:", err);
+        console.error("❌ Alert Processing Error:", err);
     }
 };
 

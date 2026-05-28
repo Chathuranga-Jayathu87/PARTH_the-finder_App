@@ -1,10 +1,13 @@
-const db = require("../config/db");
+const db = require("../config/db"); // ඔයාගේ db.js file එක තියෙන තැනට path එක නිවැරදි කරගන්න (e.g., ../db)
 
 exports.getVehicleById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const [rows] = await db.query(
+    // MySQL වල [rows] වෙනුවට { rows } ලෙස destructure කරන්න.
+    // ? වෙනුවට $1 පාවිච්චි කරන්න.
+    // v.is_deleted = 0 වෙනුවට v.is_deleted = false පාවිච්චි කරන්න (Supabase වල boolean නම්).
+    const { rows } = await db.query(
       `
       SELECT
         v.vehicle_id,
@@ -22,17 +25,19 @@ exports.getVehicleById = async (req, res) => {
       FROM vehicles v
       LEFT JOIN vehicle_status s
         ON s.vehicle_id = v.vehicle_id
-      WHERE v.vehicle_id = ?
-        AND v.is_deleted = 0
+      WHERE v.vehicle_id = $1
+        AND v.is_deleted = false
       LIMIT 1
       `,
       [id]
     );
 
+    // rows හි දිග 0 නම් vehicle එක නැත
     if (rows.length === 0) {
       return res.status(404).json({ message: "Vehicle not found" });
     }
 
+    // මුල්ම row එක response එක විදිහට යැවීම
     res.json(rows[0]);
   } catch (err) {
     console.error("❌ getVehicleById error:", err);
