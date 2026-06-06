@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getAuthToken } from "../services/authService";
 
-const SOCKET_URL = "http://169.254.16.170:5000";
+
+const SOCKET_URL = "http://10.168.231.90:5000";
 
 export interface LiveVehicleData {
   speed?: number;
@@ -26,48 +26,57 @@ export function useVehicleSocket(vehicleId?: string) {
 
     const connectSocket = async () => {
       const token = await getAuthToken();
-      //const token = await AsyncStorage.getItem("auth_token");
       if (!token) {
-        console.warn("No auth token found for socket");
+        console.warn("⚠️ No auth token found for socket");
         return;
       }
 
+    
       socketRef.current = io(SOCKET_URL, {
-        transports: ["websocket"],
+        transports: ["websocket"], 
         auth: {
           token,
         },
       });
 
+    
       socketRef.current.on("connect", () => {
         if (!isMounted) return;
         setConnected(true);
-        console.log("🔌 Socket connected");
+        console.log("🔌 Socket connected successfully");
+    
         socketRef.current?.emit("join_vehicle", vehicleId);
       });
 
-      socketRef.current.on("vehicle_update", (data) => {
+    
+      socketRef.current.on("vehicle_update", (data: LiveVehicleData) => {
         if (!isMounted) return;
         setLiveData(data);
       });
 
+    
       socketRef.current.on("disconnect", () => {
         if (!isMounted) return;
         setConnected(false);
         console.log("🔴 Socket disconnected");
       });
 
+    
       socketRef.current.on("connect_error", (err) => {
-        console.error("Socket error:", err.message);
+        console.error("❌ Socket connection error:", err.message);
       });
     };
 
     connectSocket();
 
+    
     return () => {
       isMounted = false;
-      socketRef.current?.emit("leave_vehicle", vehicleId);
-      socketRef.current?.disconnect();
+      if (socketRef.current) {
+        socketRef.current.emit("leave_vehicle", vehicleId);
+        socketRef.current.disconnect();
+        console.log("🧹 Socket cleaned up and disconnected");
+      }
     };
   }, [vehicleId]);
 

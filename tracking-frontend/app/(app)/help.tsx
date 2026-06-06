@@ -1,156 +1,130 @@
-// import React from "react";
-// import { View, Text, StyleSheet, ScrollView } from "react-native";
-// import { Ionicons } from "@expo/vector-icons";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, Platform } from "react-native"; 
+import { Ionicons, FontAwesome } from "@expo/vector-icons"; 
 
-// export default function HelpScreen() {
-//   return (
-//     <ScrollView style={styles.container}>
-//       <View style={styles.card}>
-//         <Ionicons name="help-circle-outline" size={40} color="#3f51b5" />
-//         <Text style={styles.title}>Help & Support</Text>
-//         <Text style={styles.subtitle}>
-//           We are here to help you with any issues or questions.
-//         </Text>
-//       </View>
+// FAQ සඳහා Interface එකක්
+interface FAQItemProps {
+  question: string;
+  answer: string;
+}
 
-//       <View style={styles.section}>
-//         <Text style={styles.sectionTitle}>📌 Frequently Asked Questions</Text>
+// 📌 ACCORDION COMPONENT (ප්‍රශ්න උඩ ක්ලික් කරාම උත්තර පාත් වන කම්පෝනන්ට් එක)
+const FAQItem = ({ question, answer }: FAQItemProps) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
-//         <Text style={styles.text}>
-//           • How does the live tracking work?
-//         </Text>
-//         <Text style={styles.answer}>
-//           The app tracks GPS data in real time and updates the map instantly.
-//         </Text>
-
-//         <Text style={styles.text}>
-//           • What should I do if GPS is not working?
-//         </Text>
-//         <Text style={styles.answer}>
-//           Make sure location permission is enabled and GPS is turned on.
-//         </Text>
-//       </View>
-
-//       <View style={styles.section}>
-//         <Text style={styles.sectionTitle}>📞 Contact Support</Text>
-
-//         <Text style={styles.text}>Email: support@gpstracker.com</Text>
-//         <Text style={styles.text}>Phone: +94 77 123 4567</Text>
-//         <Text style={styles.text}>Working Hours: 9:00 AM - 6:00 PM</Text>
-//       </View>
-//     </ScrollView>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: "#f9f9f9",
-//   },
-//   card: {
-//     alignItems: "center",
-//     padding: 30,
-//     backgroundColor: "#fff",
-//     margin: 15,
-//     borderRadius: 12,
-//     elevation: 3,
-//   },
-//   title: {
-//     fontSize: 22,
-//     fontWeight: "700",
-//     marginTop: 10,
-//     color: "#333",
-//   },
-//   subtitle: {
-//     fontSize: 14,
-//     color: "#666",
-//     marginTop: 8,
-//     textAlign: "center",
-//   },
-//   section: {
-//     backgroundColor: "#fff",
-//     marginHorizontal: 15,
-//     marginBottom: 15,
-//     padding: 20,
-//     borderRadius: 12,
-//   },
-//   sectionTitle: {
-//     fontSize: 16,
-//     fontWeight: "600",
-//     marginBottom: 10,
-//   },
-//   text: {
-//     fontSize: 14,
-//     marginBottom: 6,
-//     color: "#333",
-//   },
-//   answer: {
-//     fontSize: 13,
-//     color: "#666",
-//     marginBottom: 10,
-//     marginLeft: 10,
-//   },
-// });
-
-
-
-import React from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking } from "react-native"; // 1. Import Linking and TouchableOpacity
-import { Ionicons, FontAwesome } from "@expo/vector-icons"; // 2. Import FontAwesome for the WhatsApp icon
+  return (
+    <View style={styles.faqWrapper}>
+      <TouchableOpacity 
+        style={styles.faqHeader} 
+        onPress={() => setIsOpen(!isOpen)} 
+        activeOpacity={0.7}
+      >
+        <Text style={styles.faqQuestion}>{question}</Text>
+        <Ionicons 
+          name={isOpen ? "chevron-up" : "chevron-down"} 
+          size={18} 
+          color="#3f51b5" 
+        />
+      </TouchableOpacity>
+      {isOpen && (
+        <View style={styles.faqAnswerContainer}>
+          <Text style={styles.faqAnswer}>{answer}</Text>
+        </View>
+      )}
+    </View>
+  );
+};
 
 export default function HelpScreen() {
   
-  // 3. Function to handle WhatsApp redirection
+  // 🟢 WhatsApp එක විවෘත කිරීම (Universal Link Method - 100% Safe)
   const openWhatsApp = () => {
-    const phoneNumber = "+94771234567"; // Use international format without '+' or '00'
-    const message = "Hello Support, I need help with the GPS Tracker app.";
-    const url = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
+    const phoneNumber = "94771234567"; // '00' හෝ '+' නැතුව නිවැරදි ජාත්‍යන්තර ආකෘතිය
+    const message = "Hello JumboWatch Support, I need help with the app.";
+    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 
-    Linking.canOpenURL(url)
-      .then((supported) => {
-        if (supported) {
-          return Linking.openURL(url);
-        } else {
-          // Fallback if WhatsApp is not installed: Open in browser
-          return Linking.openURL(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`);
-        }
-      })
-      .catch((err) => console.error("An error occurred", err));
+    Linking.openURL(url).catch((err) => {
+      console.error("Error opening WhatsApp:", err);
+    });
+  };
+
+  // ✉️ ඊමේල් යැවීම
+  const openEmail = () => {
+    Linking.openURL("mailto:support@jumbowatch.com").catch((err) => 
+      console.error("Error opening Mail:", err)
+    );
+  };
+
+  // 📞 දුරකථන ඇමතුම් ලබා ගැනීම
+  const openPhone = () => {
+    Linking.openURL("tel:+94771234567").catch((err) => 
+      console.error("Error opening Dialer:", err)
+    );
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      <ScrollView style={styles.container}>
+    <View style={{ flex: 1, backgroundColor: "#f9f9f9" }}>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        
+        {/* 1. Header Card */}
         <View style={styles.card}>
-          <Ionicons name="help-circle-outline" size={40} color="#3f51b5" />
+          <View style={styles.iconBg}>
+            <Ionicons name="help-circle" size={36} color="#3f51b5" />
+          </View>
           <Text style={styles.title}>Help & Support</Text>
           <Text style={styles.subtitle}>
-            We are here to help you with any issues or questions.
+            We are here to help you with any issues or questions regarding JumboWatch tracking.
           </Text>
         </View>
 
+        {/* 2. FAQ Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>📌 Frequently Asked Questions</Text>
-          <Text style={styles.text}>• How does the live tracking work?</Text>
-          <Text style={styles.answer}>
-            The app tracks GPS data in real time and updates the map instantly.
-          </Text>
+          
+          <FAQItem 
+            question="How does the live tracking work?" 
+            answer="The app tracks GPS data in real time from the vehicle's installed physical tracker and updates the server via cellular connection, instantly reflecting on your map dashboard."
+          />
 
-          <Text style={styles.text}>• What should I do if GPS is not working?</Text>
-          <Text style={styles.answer}>
-            Make sure location permission is enabled and GPS is turned on.
-          </Text>
+          <FAQItem 
+            question="What should I do if GPS is not updating?" 
+            answer="Please check if the physical tracker device has proper power supply and the SIM card inside has active data. Also, ensure your smartphone has a stable internet connection."
+          />
+
+          <FAQItem 
+            question="How do I setup geo-fencing alerts?" 
+            answer="Go to Vehicle Details page, choose the specific vehicle, and navigate to configuration settings to set up custom boundary alert notification areas."
+          />
         </View>
 
+        {/* 3. Contact Support Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>📞 Contact Support</Text>
-          <Text style={styles.text}>Email: support@gpstracker.com</Text>
-          <Text style={styles.text}>Phone: +94 77 123 4567</Text>
-          <Text style={styles.text}>Working Hours: 9:00 AM - 6:00 PM</Text>
+          
+          {/* Email Shortcut */}
+          <TouchableOpacity style={styles.contactRow} onPress={openEmail} activeOpacity={0.6}>
+            <Ionicons name="mail-outline" size={20} color="#3f51b5" />
+            <Text style={styles.contactText}>support@jumbowatch.com</Text>
+          </TouchableOpacity>
+
+          {/* Phone Shortcut */}
+          <TouchableOpacity style={styles.contactRow} onPress={openPhone} activeOpacity={0.6}>
+            <Ionicons name="call-outline" size={20} color="#3f51b5" />
+            <Text style={styles.contactText}>+94 77 123 4567</Text>
+          </TouchableOpacity>
+
+          {/* Time Info */}
+          <View style={[styles.contactRow, { opacity: 0.7 }]}>
+            <Ionicons name="time-outline" size={20} color="#666" />
+            <Text style={[styles.contactText, { color: '#666' }]}>Working Hours: 9:00 AM - 6:00 PM</Text>
+          </View>
         </View>
+        
+        {/* Extra spacing below */}
+        <View style={{ height: 100 }} />
       </ScrollView>
 
-      {/* 4. The Floating WhatsApp Button */}
+      {/* 4. Floating WhatsApp Button */}
       <TouchableOpacity 
         style={styles.fab} 
         onPress={openWhatsApp}
@@ -165,66 +139,117 @@ export default function HelpScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f9f9f9",
   },
   card: {
     alignItems: "center",
-    padding: 30,
+    padding: 25,
     backgroundColor: "#fff",
-    margin: 15,
-    borderRadius: 12,
-    elevation: 3,
+    marginHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 10,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#eef0f5',
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 6 },
+      android: { elevation: 2 }
+    }),
+  },
+  iconBg: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#edf0f9',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   title: {
     fontSize: 22,
-    fontWeight: "700",
-    marginTop: 10,
-    color: "#333",
+    fontWeight: "bold",
+    marginTop: 12,
+    color: "#222",
   },
   subtitle: {
     fontSize: 14,
     color: "#666",
-    marginTop: 8,
+    marginTop: 6,
     textAlign: "center",
+    lineHeight: 20
   },
   section: {
     backgroundColor: "#fff",
-    marginHorizontal: 15,
-    marginBottom: 15,
-    padding: 20,
-    borderRadius: 12,
+    marginHorizontal: 16,
+    marginBottom: 14,
+    padding: 18,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#eef0f5',
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 6 },
+      android: { elevation: 2 }
+    }),
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 10,
+    fontWeight: "700",
+    marginBottom: 15,
+    color: '#333'
   },
-  text: {
+  // FAQ Accordion Styles
+  faqWrapper: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#edf0f4',
+    paddingVertical: 12,
+  },
+  faqHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  faqQuestion: {
     fontSize: 14,
-    marginBottom: 6,
-    color: "#333",
+    fontWeight: '600',
+    color: '#333',
+    flex: 1,
+    paddingRight: 10,
   },
-  answer: {
+  faqAnswerContainer: {
+    marginTop: 8,
+    backgroundColor: '#f8f9fc',
+    padding: 12,
+    borderRadius: 8,
+  },
+  faqAnswer: {
     fontSize: 13,
-    color: "#666",
-    marginBottom: 10,
-    marginLeft: 10,
+    color: '#555',
+    lineHeight: 18,
   },
-  // 5. FAB Styles
+  // Contact Rows
+  contactRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  contactText: {
+    fontSize: 14,
+    marginLeft: 12,
+    color: '#3f51b5',
+    fontWeight: '500'
+  },
+  // FAB Styles
   fab: {
     position: 'absolute',
     bottom: 25,
     right: 25,
-    backgroundColor: '#25D366', // WhatsApp Green
-    width: 65,
-    height: 65,
-    borderRadius: 32.5,
+    backgroundColor: '#25D366', 
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 5, // Android shadow
-    shadowColor: '#000', // iOS shadow
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 4 },
+      android: { elevation: 5 }
+    }),
   },
 });

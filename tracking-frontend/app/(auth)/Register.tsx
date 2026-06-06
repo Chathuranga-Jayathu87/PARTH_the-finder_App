@@ -1,92 +1,3 @@
-// import react, { useState } from 'react';
-// import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
-// import { Link, router } from 'expo-router';
-// import { register } from '../../src/services/authService';
-
-// export default function Register() {
-//     const [name, setName] = useState('');
-//     const [email, setEmail] = useState('');
-//     const [password, setPassword] = useState('');
-//     const [phone, setPhone] = useState('');
-//     const [loading, setLoading] = useState(false);
-
-//     const handleRegister = async () => {
-//         if (!name || !email || !password || !phone) {
-//             Alert.alert('Error', 'Please fill in all fields.');
-//             return;
-//         }
-
-//         setLoading(true);
-//         try {
-//             await register(name, email, password, phone);
-//             Alert.alert("Success", "Registration complete! Please log in.");
-//             router.replace('/(auth)/Login');
-//         } catch (err) {
-//             Alert.alert("Registration Failed.", (err as Error).message);
-//         }
-//         setLoading(false);
-//     };
-
-//     return (
-//         <View style={styles.container}>
-            
-//             <Text style={styles.title}>GPS Register</Text>
-//             <TextInput
-//                 style={styles.input}
-//                 placeholder="Name"
-//                 placeholderTextColor="#888"
-//                 value={name}
-//                 onChangeText={setName}
-//             />
-//             <TextInput
-//                 style={styles.input}
-//                 placeholder="Email"
-//                 placeholderTextColor="#888"
-//                 keyboardType="email-address"
-//                 value={email}
-//                 onChangeText={setEmail}
-//             />
-//             <TextInput
-//                 style={styles.input}
-//                 placeholder="Password"
-//                 placeholderTextColor="#888"
-//                 value={password}
-//                 onChangeText={setPassword}
-//                 secureTextEntry
-//             />
-//             <TextInput
-//                 style={styles.input}
-//                 placeholder="Phone"
-//                 placeholderTextColor="#888"
-//                 value={phone}
-//                 onChangeText={setPhone}
-//                 keyboardType="phone-pad"
-//             />
-//             <Button title="Register" onPress={handleRegister} disabled={loading} />
-//             {loading && <ActivityIndicator style={{ marginTop: 10 }} />}
-//         </View>
-//     );
-
-// }
-
-// const styles = StyleSheet.create({
-//     container: { flex: 1, justifyContent: 'center', padding: 20 },
-//     title: { fontSize: 24, textAlign: 'center', marginBottom: 20 },
-//     input: {
-//         borderWidth: 1,
-//         borderColor: '#ccc',
-//         marginBottom: 10,
-//         borderRadius: 5,
-//         padding: 10,
-//         backgroundColor: '#fff',
-//         color: '#000',
-
-//     }
-// });
-
-
-
 import React, { useState } from 'react';
 import { 
   View, 
@@ -102,12 +13,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { register } from '../../src/services/authService';
 
 export default function Register() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [phone, setPhone] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  
+  const [name, setName] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [phone, setPhone] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const handleRegister = async () => {
     if (!name || !email || !password || !phone) {
@@ -122,11 +34,13 @@ export default function Register() {
 
     setLoading(true);
     try {
+  
       await register(name, email, password, phone);
       Alert.alert("Success", "Registration complete! Please log in.");
       router.replace('/(auth)/Login');
-    } catch (err) {
-      Alert.alert("Registration Failed.", (err as Error).message);
+    } catch (err: any) {
+      // 🛠️ TS Error handling fix
+      Alert.alert("Registration Failed", err.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -176,6 +90,7 @@ export default function Register() {
           onChangeText={setPassword}
           secureTextEntry={!showPassword}
           placeholderTextColor="#888"
+          autoCapitalize="none" 
         />
         <TouchableOpacity 
           onPress={() => setShowPassword(!showPassword)}
@@ -222,7 +137,7 @@ export default function Register() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 30, backgroundColor: '#f9f9f9' },
+  container: { flex: 1, padding: 30, backgroundColor: '#f9f9f9', justifyContent: 'center' }, 
   header: { alignItems: 'center', marginBottom: 40 },
   title: { fontSize: 28, fontWeight: 'bold', color: '#333', marginTop: 10 },
   subtitle: { fontSize: 14, color: '#666', marginTop: 5 },

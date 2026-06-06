@@ -95,6 +95,8 @@ router.put('/change-password', async (req, res) => {
     const userId = req.user.user_id;
     const { oldPassword, newPassword } = req.body;
 
+   
+
     if (!isValidPassword(newPassword)) {
         return res.status(400).json({ success: false, message: "New password must be between 8 and 128 characters." });
     }

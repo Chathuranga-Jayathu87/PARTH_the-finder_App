@@ -1,280 +1,19 @@
-// import React, { useEffect, useRef, useState } from "react";
-// import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
-// import { useLocalSearchParams } from "expo-router";
-// import { Ionicons } from "@expo/vector-icons";
-// import MapView, { Marker, Region } from "react-native-maps";
-// import { io, Socket } from "socket.io-client";
-// import { getVehicleById } from "@/src/services/vehicleService";
-// import { useVehicleSocket } from "@/src/hooks/useVehicleSocket";
-
-// /* ================= CONFIG ================= */
-
-// const API_URL = "http://169.254.16.170:5000/api";   // REST API
-// const SOCKET_URL = "http://169.254.16.170:5000";   // Socket.IO
-
-// /* ================= TYPES ================= */
-
-// interface VehicleData {
-//   id: string;
-//   plate: string;
-//   model: string;
-//   status: string;
-//   ignition: boolean;
-//   fuel: number;
-//   speed: number;
-//   liveCoords: {
-//     latitude: number;
-//     longitude: number;
-//   };
-// }
-
-// interface StatusCardProps {
-//   iconName: keyof typeof Ionicons.glyphMap;
-//   title: string;
-//   value: string;
-//   color: string;
-// }
-
-// /* ================= HELPERS ================= */
-
-// const createEmptyVehicle = (id: string): VehicleData => ({
-//   id,
-//   plate: "",
-//   model: "",
-//   status: "Offline",
-//   ignition: false,
-//   fuel: 0,
-//   speed: 0,
-//   liveCoords: {
-//     latitude: 6.9271,     // Colombo default
-//     longitude: 79.8612,
-//   },
-// });
-
-// /* ================= SCREEN ================= */
-
-// export default function VehicleDetailScreen() {
-//   const { id } = useLocalSearchParams<{ id: string }>();
-//   const socketRef = useRef<Socket | null>(null);
-//   const { liveData, connected } = useVehicleSocket(id);
-
-//   const [vehicle, setVehicle] = useState<VehicleData | null>(null);
-//   const [loading, setLoading] = useState(true);
-
-//   /* -------- LOAD STATIC VEHICLE DATA -------- */
-//   useEffect(() => {
-//     if (!id) return;
-
-//     const loadVehicle = async () => {
-//       try {
-//         setLoading(true);
-//         setVehicle(createEmptyVehicle(id));
-
-//         const data =await getVehicleById(id);
-
-//         console.log(data.license_plate);
-
-//         setVehicle({
-//       id: String(data.vehicle_id),
-//       plate: data.license_plate,
-//       model: data.make_model,
-//       status: data.online ? "Online" : "Offline",
-//       ignition: Boolean(data.ignition_status),
-//       fuel: data.fuel,
-//       speed: data.speed,
-//       liveCoords: {
-//         latitude: data.lat,
-//         longitude: data.lng,
-//       },
-//     });
-
-//         setLoading(false);
-//       } catch (err) {
-//         console.error("Failed to load vehicle", err);
-//         setLoading(false);
-//       }
-//     };
-
-//     loadVehicle();
-//   }, [id]);
-
-// useEffect(() => {
-//   if (!liveData || !vehicle) return;
-
-//   setVehicle((prev) => {
-//     if (!prev) return prev;
-
-//     return {
-//       ...prev,
-//       speed: liveData.speed ?? prev.speed,
-//       fuel: liveData.fuel ?? prev.fuel,
-//       ignition: liveData.ignition ?? prev.ignition,
-//       status: connected ? "Online" : "Offline",
-//       liveCoords: {
-//         latitude: liveData.latitude ?? prev.liveCoords.latitude,
-//         longitude: liveData.longitude ?? prev.liveCoords.longitude,
-//       },
-//     };
-//   });
-// }, [liveData, connected]);
-
-// /* ================= UI ================= */
-
-//   if (loading || !vehicle) {
-//     return (
-//       <View style={styles.center}>
-//         <ActivityIndicator size="large" color="#3f51b5" />
-//         <Text style={styles.loading}>Loading vehicle...</Text>
-//       </View>
-//     );
-//   }
-
-//   const mapRegion: Region = {
-//     latitude: vehicle.liveCoords.latitude,
-//     longitude: vehicle.liveCoords.longitude,
-//     latitudeDelta: 0.01,
-//     longitudeDelta: 0.01,
-//   };
-
-//   return (
-//     <ScrollView style={styles.container}>
-//       {/* HEADER */}
-//       <View style={styles.header}>
-//         <Text style={styles.plate}>
-//           {vehicle.plate || "Vehicle"}
-//         </Text>
-//         <Text style={styles.model}>
-//           {vehicle.model || "Unknown Model"}
-//         </Text>
-//       </View>
-
-//       {/* STATUS */}
-//       <View style={styles.statusRow}>
-//         <StatusCard
-//           iconName={vehicle.ignition ? "flash" : "flash-off"}
-//           title="Ignition"
-//           value={vehicle.ignition ? "ON" : "OFF"}
-//           color={vehicle.ignition ? "#4CAF50" : "#FF5722"}
-//         />
-
-//         <StatusCard
-//           iconName="speedometer"
-//           title="Speed"
-//           value={`${vehicle.speed} km/h`}
-//           color="#3f51b5"
-//         />
-
-//         <StatusCard
-//           iconName="water"
-//           title="Fuel"
-//           value={`${vehicle.fuel}%`}
-//           color={vehicle.fuel < 20 ? "#FFC107" : "#00BCD4"}
-//         />
-//       </View>
-
-//       {/* MAP */}
-//       <View style={styles.mapWrapper}>
-//         <Text style={styles.mapHeader}>Live Location</Text>
-//         <MapView style={styles.map} region={mapRegion}>
-//           <Marker coordinate={vehicle.liveCoords}>
-//             <Ionicons name="car" size={32} color="#3f51b5" />
-//           </Marker>
-//         </MapView>
-//       </View>
-//     </ScrollView>
-//   );
-// }
-
-// /* ================= COMPONENTS ================= */
-
-// const StatusCard: React.FC<StatusCardProps> = ({ iconName, title, value, color }) => (
-//   <View style={styles.card}>
-//     <Ionicons name={iconName} size={26} color={color} />
-//     <Text style={styles.cardTitle}>{title}</Text>
-//     <Text style={[styles.cardValue, { color }]}>{value}</Text>
-//   </View>
-// );
-
-// /* ================= STYLES ================= */
-
-// const styles = StyleSheet.create({
-//   container: { flex: 1, backgroundColor: "#f5f5f5" },
-
-//   center: {
-//     flex: 1,
-//     justifyContent: "center",
-//     alignItems: "center",
-//   },
-
-//   loading: { marginTop: 10, color: "#666" },
-
-//   header: {
-//     padding: 20,
-//     backgroundColor: "#fff",
-//   },
-
-//   plate: {
-//     fontSize: 24,
-//     fontWeight: "bold",
-//   },
-
-//   model: {
-//     fontSize: 16,
-//     color: "#666",
-//   },
-
-//   statusRow: {
-//     flexDirection: "row",
-//     padding: 10,
-//   },
-
-//   card: {
-//     flex: 1,
-//     backgroundColor: "#fff",
-//     marginHorizontal: 5,
-//     padding: 15,
-//     borderRadius: 8,
-//     alignItems: "center",
-//     elevation: 3,
-//   },
-
-//   cardTitle: { fontSize: 13, color: "#666" },
-//   cardValue: { fontSize: 18, fontWeight: "700" },
-
-//   mapWrapper: {
-//     margin: 10,
-//     backgroundColor: "#fff",
-//     borderRadius: 8,
-//     overflow: "hidden",
-//   },
-
-//   mapHeader: {
-//     padding: 10,
-//     fontWeight: "600",
-//   },
-
-//   map: {
-//     height: 400,
-//   },
-// });
-
 import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   ActivityIndicator,
+  Platform,
+  Dimensions,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import MapView, { Marker, Region } from "react-native-maps";
+import MapView, { Marker, Region, PROVIDER_GOOGLE } from "react-native-maps"; // 👈 PROVIDER_GOOGLE Import කරා
 import { getVehicleById } from "@/src/services/vehicleService";
 import { useVehicleSocket } from "@/src/hooks/useVehicleSocket";
 
-/* ================= CONFIG ================= */
-const API_URL = "http://169.254.16.170:5000/api"; // REST API
-const SOCKET_URL = "http://169.254.16.170:5000"; // Socket.IO
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 /* ================= TYPES ================= */
 interface VehicleData {
@@ -285,6 +24,7 @@ interface VehicleData {
   ignition: boolean;
   fuel: number;
   speed: number;
+  heading: number; 
   liveCoords: {
     latitude: number;
     longitude: number;
@@ -296,6 +36,7 @@ interface StatusCardProps {
   title: string;
   value: string;
   color: string;
+  subValue?: string;
 }
 
 /* ================= HELPERS ================= */
@@ -307,50 +48,47 @@ const createEmptyVehicle = (id: string): VehicleData => ({
   ignition: false,
   fuel: 0,
   speed: 0,
+  heading: 0,
   liveCoords: {
     latitude: 6.9271, // Colombo default
     longitude: 79.8612,
   },
 });
 
-/* ================= SCREEN ================= */
 export default function VehicleDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const mapRef = useRef<MapView | null>(null); // 👈 Map එක ඇනිමේට් කරන්න Ref එකක් හැදුවා
+  const mapRef = useRef<MapView | null>(null); 
   const { liveData, connected } = useVehicleSocket(id);
 
   const [vehicle, setVehicle] = useState<VehicleData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  /* -------- LOAD STATIC VEHICLE DATA -------- */
+  /* -------- 1. LOAD STATIC VEHICLE DATA -------- */
   useEffect(() => {
     if (!id) return;
 
     const loadVehicle = async () => {
       try {
         setLoading(true);
-        setVehicle(createEmptyVehicle(id));
-
         const data = await getVehicleById(id);
-        console.log("Vehicle Plate Loaded:", data.license_plate);
-
+        
         setVehicle({
           id: String(data.vehicle_id),
           plate: data.license_plate,
           model: data.make_model,
           status: data.online ? "Online" : "Offline",
           ignition: Boolean(data.ignition_status),
-          fuel: data.fuel,
-          speed: data.speed,
+          fuel: data.fuel ?? 0,
+          speed: data.speed ?? 0,
+          heading: data.heading ?? 0,
           liveCoords: {
-            latitude: data.lat,
-            longitude: data.lng,
+            latitude: Number(data.lat) || 6.9271,
+            longitude: Number(data.lng) || 79.8612,
           },
         });
-
-        setLoading(false);
       } catch (err) {
-        console.error("Failed to load vehicle", err);
+        console.error("Failed to load vehicle static data:", err);
+      } finally {
         setLoading(false);
       }
     };
@@ -358,18 +96,19 @@ export default function VehicleDetailScreen() {
     loadVehicle();
   }, [id]);
 
-  /* -------- LIVE SOCKET DATA UPDATE -------- */
+  /* -------- 2. LIVE SOCKET DATA UPDATE -------- */
   useEffect(() => {
-    if (!liveData || !vehicle) return;
+    if (!liveData) return;
 
     setVehicle((prev) => {
       if (!prev) return prev;
-
       return {
         ...prev,
         speed: liveData.speed ?? prev.speed,
         fuel: liveData.fuel ?? prev.fuel,
         ignition: liveData.ignition ?? prev.ignition,
+        // liveData may not include heading in its type; coerce to any to safely read if present
+        heading: (liveData as any).heading ?? prev.heading,
         status: connected ? "Online" : "Offline",
         liveCoords: {
           latitude: liveData.latitude ?? prev.liveCoords.latitude,
@@ -377,149 +116,257 @@ export default function VehicleDetailScreen() {
         },
       };
     });
+  }, [liveData, connected]);
 
-    // 👈 වාහනය යද්දී මැප් එක ස්මූත් විදිහට එහා මෙහා වෙන්න මෙතනින් ඇනිමේට් කරනවා
-    if (liveData.latitude && liveData.longitude && mapRef.current) {
+  /* -------- 3. MAP ANIMATION EFFECT -------- */
+  useEffect(() => {
+    if (liveData?.latitude && liveData?.longitude && mapRef.current) {
       mapRef.current.animateToRegion(
         {
           latitude: liveData.latitude,
           longitude: liveData.longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
+          latitudeDelta: 0.006, 
+          longitudeDelta: 0.006,
         },
-        1000,
-      ); // මිලි තත්පර 1000 ක ස්මූත් ඇනිමේෂන් එකක්
+        1000 
+      );
     }
-  }, [liveData, connected]);
+  }, [liveData?.latitude, liveData?.longitude]);
 
   /* ================= UI ================= */
   if (loading || !vehicle) {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#3f51b5" />
-        <Text style={styles.loading}>Loading vehicle...</Text>
+        <Text style={styles.loading}>Connecting to JumboWatch GPS...</Text>
       </View>
     );
   }
 
-  // මැප් එක මුලින්ම ඕපන් වෙද්දී පෙන්වන්න ඕන තැන (Initial Region)
   const initialMapRegion: Region = {
     latitude: vehicle.liveCoords.latitude,
     longitude: vehicle.liveCoords.longitude,
-    latitudeDelta: 0.01,
-    longitudeDelta: 0.01,
+    latitudeDelta: 0.008,
+    longitudeDelta: 0.008,
   };
 
   return (
-    <ScrollView style={styles.container}>
-      {/* HEADER */}
-      <View style={styles.header}>
-        <Text style={styles.plate}>{vehicle.plate || "Vehicle"}</Text>
-        <Text style={styles.model}>{vehicle.model || "Unknown Model"}</Text>
-      </View>
-
-      {/* STATUS */}
-      <View style={styles.statusRow}>
-        <StatusCard
-          iconName={vehicle.ignition ? "flash" : "flash-off"}
-          title="Ignition"
-          value={vehicle.ignition ? "ON" : "OFF"}
-          color={vehicle.ignition ? "#4CAF50" : "#FF5722"}
-        />
-
-        <StatusCard
-          iconName="speedometer"
-          title="Speed"
-          value={`${vehicle.speed} km/h`}
-          color="#3f51b5"
-        />
-
-        <StatusCard
-          iconName="water"
-          title="Fuel"
-          value={`${vehicle.fuel}%`}
-          color={vehicle.fuel < 20 ? "#FFC107" : "#00BCD4"}
-        />
-      </View>
-
-      {/* MAP */}
-      <View style={styles.mapWrapper}>
-        <Text style={styles.mapHeader}>Live Location</Text>
-        <MapView
-          ref={mapRef} // 👈 Ref එක ලින්ක් කරා
-          style={styles.map}
-          initialRegion={initialMapRegion} // 👈 region වෙනුවට initialRegion පාවිච්චි කරා
+    <View style={styles.container}>
+      
+      {/* 🗺️ GOOGLE MAP VIEW */}
+      <MapView
+        ref={mapRef}
+        style={styles.fullMap}
+        provider={PROVIDER_GOOGLE} // 👈 මෙතනින් Google Maps ප්ලගින් එක Force කරා
+        initialRegion={initialMapRegion}
+        showsUserLocation={true}
+        showsCompass={true}
+        rotateEnabled={true} 
+      >
+        <Marker 
+          coordinate={vehicle.liveCoords}
+          flat={true} 
+          anchor={{ x: 0.5, y: 0.5 }}
         >
-          <Marker coordinate={vehicle.liveCoords}>
-            <Ionicons name="car" size={32} color="#3f51b5" />
-          </Marker>
-        </MapView>
+          <View style={[styles.markerWrap, { transform: [{ rotate: `${vehicle.heading}deg` }] }]}>
+            <View style={[styles.markerCircle, { backgroundColor: vehicle.status === "Online" ? "#3f51b5" : "#757575" }]}>
+              <Ionicons name="navigate" size={18} color="#fff" />
+            </View>
+            <View style={styles.markerArrow} />
+          </View>
+        </Marker>
+      </MapView>
+
+      {/* 💳 FLOATING BOTTOM PANEL */}
+      <View style={styles.bottomSheet}>
+        <View style={styles.indicator} />
+
+        <View style={styles.sheetHeader}>
+          <View>
+            <Text style={styles.plate}>{vehicle.plate || "No Plate"}</Text>
+            <Text style={styles.model}>{vehicle.model || "Standard Tracker Device"}</Text>
+          </View>
+          <View style={[styles.statusBadge, { backgroundColor: vehicle.status === "Online" ? "#E8F5E9" : "#F5F5F5" }]}>
+            <View style={[styles.pulseDot, { backgroundColor: vehicle.status === "Online" ? "#4CAF50" : "#9E9E9E" }]} />
+            <Text style={[styles.statusText, { color: vehicle.status === "Online" ? "#2E7D32" : "#616161" }]}>
+              {vehicle.status}
+            </Text>
+          </View>
+        </View>
+
+        {/* Dashboard Cards Grid */}
+        <View style={styles.statusRow}>
+          <StatusCard
+            iconName={vehicle.ignition ? "flash" : "flash-off"}
+            title="Ignition"
+            value={vehicle.ignition ? "ON" : "OFF"}
+            color={vehicle.ignition ? "#4CAF50" : "#FF5722"}
+            subValue={vehicle.ignition ? "Engine Running" : "Engine Idle"}
+          />
+
+          <StatusCard
+            iconName="speedometer-outline"
+            title="Live Speed"
+            value={`${vehicle.speed} km/h`}
+            color="#3f51b5"
+            subValue={vehicle.speed > 60 ? "Overspeeding" : "Normal"}
+          />
+
+          <StatusCard
+            iconName="water-outline"
+            title="Fuel Level"
+            value={`${vehicle.fuel}%`}
+            color={vehicle.fuel < 20 ? "#FFB300" : "#00BCD4"}
+            subValue={`${Math.round(vehicle.fuel * 0.5)} Liters`} 
+          />
+        </View>
       </View>
-    </ScrollView>
+
+    </View>
   );
 }
 
 /* ================= COMPONENTS ================= */
-const StatusCard: React.FC<StatusCardProps> = ({
-  iconName,
-  title,
-  value,
-  color,
-}) => (
+const StatusCard: React.FC<StatusCardProps> = ({ iconName, title, value, color, subValue }) => (
   <View style={styles.card}>
-    <Ionicons name={iconName} size={26} color={color} />
+    <View style={[styles.cardIconBg, { backgroundColor: color + '12' }]}>
+      <Ionicons name={iconName} size={22} color={color} />
+    </View>
     <Text style={styles.cardTitle}>{title}</Text>
     <Text style={[styles.cardValue, { color }]}>{value}</Text>
+    {subValue && <Text style={styles.cardSubValue}>{subValue}</Text>}
   </View>
 );
 
 /* ================= STYLES ================= */
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f5f5f5" },
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+  container: { flex: 1, backgroundColor: "#fff" },
+  center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f9f9f9" },
+  loading: { marginTop: 12, color: "#444", fontWeight: "500", fontSize: 14 },
+
+  fullMap: {
+    width: "100%",
+    height: SCREEN_HEIGHT - 220, 
   },
-  loading: { marginTop: 10, color: "#666" },
-  header: {
-    padding: 20,
+
+  markerWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 40,
+    height: 40,
+  },
+  markerCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+  markerArrow: {
+    width: 0,
+    height: 0,
+    backgroundColor: 'transparent',
+    borderStyle: 'solid',
+    borderLeftWidth: 5,
+    borderRightWidth: 5,
+    borderBottomWidth: 8,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: '#3f51b5',
+    position: 'absolute',
+    top: -4, 
+  },
+
+  bottomSheet: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
     backgroundColor: "#fff",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingBottom: Platform.OS === 'ios' ? 35 : 20,
+    paddingTop: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  indicator: {
+    width: 40,
+    height: 4,
+    backgroundColor: "#e0e0e0",
+    borderRadius: 2,
+    alignSelf: "center",
+    marginBottom: 15,
+  },
+  sheetHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 18,
   },
   plate: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#1a1a1a",
+    letterSpacing: 0.5,
   },
   model: {
-    fontSize: 16,
+    fontSize: 13,
     color: "#666",
+    marginTop: 2,
   },
+  statusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+  },
+  pulseDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    marginRight: 6,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: "700",
+  },
+
   statusRow: {
     flexDirection: "row",
-    padding: 10,
+    justifyContent: "space-between",
+    marginHorizontal: -4,
   },
   card: {
     flex: 1,
-    backgroundColor: "#fff",
-    marginHorizontal: 5,
-    padding: 15,
-    borderRadius: 8,
+    backgroundColor: "#f8f9fa",
+    marginHorizontal: 4,
+    paddingVertical: 14,
+    paddingHorizontal: 10,
+    borderRadius: 16,
     alignItems: "center",
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: "#f1f3f5",
   },
-  cardTitle: { fontSize: 13, color: "#666" },
-  cardValue: { fontSize: 18, fontWeight: "700" },
-  mapWrapper: {
-    margin: 10,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    overflow: "hidden",
+  cardIconBg: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
   },
-  mapHeader: {
-    padding: 10,
-    fontWeight: "600",
-  },
-  map: {
-    height: 400,
-  },
+  cardTitle: { fontSize: 11, color: "#7a7a7a", fontWeight: "600" },
+  cardValue: { fontSize: 15, fontWeight: "700", marginTop: 4 },
+  cardSubValue: { fontSize: 10, color: "#999", marginTop: 2, fontWeight: "500" },
 });

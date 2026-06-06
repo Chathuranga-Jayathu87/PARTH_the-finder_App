@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
     View,
     Text,
@@ -6,11 +6,14 @@ import {
     TextInput,
     TouchableOpacity,
     Alert,
-    ActivityIndicator
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { changePassword } from '@/src/services/userService';
+import { changePassword } from '../../../src/services/userService'; // API call for changing password
 
 export default function ChangePasswordScreen() {
     const [oldPassword, setOldPassword] = useState('');
@@ -21,37 +24,36 @@ export default function ChangePasswordScreen() {
     const [newVisible, setNewVisible] = useState(false);
     const [confirmVisible, setConfirmVisible] = useState(false);
 
-    const [strength, setStrength] = useState(0);
     const [loading, setLoading] = useState(false);
 
-    const checkPasswordStrength = (pass:string) => {
+    /* 📊 PASSWORD STRENGTH CALCULATOR (Real-time & Cached) */
+    const strength = useMemo(() => {
+        if (!newPassword) return 0;
         let score = 0;
-        if (pass.length >= 8) score++;
-        if (/[A-Z]/.test(pass)) score++;
-        if (/[0-9]/.test(pass)) score++;
-        if (/[^A-Za-z0-9]/.test(pass)) score++;
-        setStrength(score);
-        setNewPassword(pass);
-    };
+        if (newPassword.length >= 8) score++;
+        if (/[A-Z]/.test(newPassword)) score++;
+        if (/[0-9]/.test(newPassword)) score++;
+        if (/[^A-Za-z0-9]/.test(newPassword)) score++;
+        return score;
+    }, [newPassword]);
 
-   const getStrengthStyles = () => {
-    switch (strength) {
-        case 1:
-            return { color: '#FF3B30', label: 'Weak', width: 25 };
-        case 2:
-            return { color: '#FF9500', label: 'Fair', width: 50 };
-        case 3:
-            return { color: '#FFCC00', label: 'Good', width: 75 };
-        case 4:
-            return { color: '#4CD964', label: 'Strong', width: 100 };
-        default:
-            return { color: '#E0E0E0', label: 'Very Weak', width: 10 };
-    }
-};
+    /* 🎨 STRENGTH BAR STYLES GENERATOR */
+    const strengthStyle = useMemo(() => {
+        switch (strength) {
+            case 1:
+                return { color: '#FF3B30', label: 'Weak', width: 25 };
+            case 2:
+                return { color: '#FF9500', label: 'Fair', width: 50 };
+            case 3:
+                return { color: '#FFCC00', label: 'Good', width: 75 };
+            case 4:
+                return { color: '#4CD964', label: 'Strong', width: 100 };
+            default:
+                return { color: '#E0E0E0', label: 'Very Weak', width: 10 };
+        }
+    }, [strength]);
 
-
-    const strengthStyle = getStrengthStyles();
-
+    /* 🚀 SUBMIT LOGIC */
     const handleChangePassword = async () => {
         if (!oldPassword || !newPassword || !confirmPassword) {
             Alert.alert('Error', 'All fields are required');
@@ -60,6 +62,11 @@ export default function ChangePasswordScreen() {
 
         if (newPassword !== confirmPassword) {
             Alert.alert('Error', 'New passwords do not match');
+            return;
+        }
+
+        if (strength < 3) {
+            Alert.alert('Error', 'Please choose a stronger password');
             return;
         }
 
@@ -74,6 +81,7 @@ export default function ChangePasswordScreen() {
                 Alert.alert('Error', result.message || 'Failed to change password');
             }
         } catch (error) {
+            console.error("Change password error:", error);
             Alert.alert('Error', 'Something went wrong. Try again.');
         } finally {
             setLoading(false);
@@ -81,105 +89,118 @@ export default function ChangePasswordScreen() {
     };
 
     return (
-        <View style={styles.container}>
+        // 🍏 කීබෝඩ් එක ආවම ඉන්පුට් හැංගෙන එක වැළැක්වීමට KeyboardAvoidingView දාමු
+        <KeyboardAvoidingView 
+            style={{ flex: 1 }} 
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+            <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
 
-            {/* Current Password */}
-            <Text style={styles.label}>Current Password</Text>
-            <View style={styles.passwordContainer}>
-                <TextInput
-                    style={styles.inputflex}
-                    secureTextEntry={!oldVisible}
-                    value={oldPassword}
-                    onChangeText={setOldPassword}
-                    placeholder="Enter current password"
-                />
-                <TouchableOpacity onPress={() => setOldVisible(!oldVisible)}>
-                    <Ionicons
-                        name={oldVisible ? 'eye-off-outline' : 'eye-outline'}
-                        size={22}
-                        color="#666"
+                {/* Current Password */}
+                <Text style={styles.label}>Current Password</Text>
+                <View style={styles.passwordContainer}>
+                    <TextInput
+                        style={styles.inputflex}
+                        secureTextEntry={!oldVisible}
+                        value={oldPassword}
+                        onChangeText={setOldPassword}
+                        placeholder="Enter current password"
+                        autoCapitalize="none"
+                        autoCorrect={false}
                     />
-                </TouchableOpacity>
-            </View>
-
-            {/* New Password */}
-            <Text style={styles.label}>New Password</Text>
-            <View style={styles.passwordContainer}>
-                <TextInput
-                    style={styles.inputflex}
-                    secureTextEntry={!newVisible}
-                    value={newPassword}
-                    onChangeText={checkPasswordStrength}
-                    placeholder="Enter new password"
-                />
-                <TouchableOpacity onPress={() => setNewVisible(!newVisible)}>
-                    <Ionicons
-                        name={newVisible ? 'eye-off-outline' : 'eye-outline'}
-                        size={22}
-                        color="#666"
-                    />
-                </TouchableOpacity>
-            </View>
-
-            {/* Strength Indicator */}
-            {newPassword.length > 0 && (
-                <View style={styles.strengthWrapper}>
-                    <View style={styles.strengthBarBackground}>
-                       <View
-                            style={[
-                                styles.strengthBarActive,
-                                {
-                                    width: `${strengthStyle.width}%`,
-                                    backgroundColor: strengthStyle.color
-                                }
-                            ]}
+                    <TouchableOpacity onPress={() => setOldVisible(!oldVisible)} style={styles.eyeButton}>
+                        <Ionicons
+                            name={oldVisible ? 'eye-off-outline' : 'eye-outline'}
+                            size={20}
+                            color="#8e8e93"
                         />
-                    </View>
-                    <Text style={[styles.strengthLabel, { color: strengthStyle.color }]}>
-                        {strengthStyle.label}
-                    </Text>
+                    </TouchableOpacity>
                 </View>
-            )}
 
-            {/* Confirm Password */}
-            <Text style={styles.label}>Confirm New Password</Text>
-            <View style={styles.passwordContainer}>
-                <TextInput
-                    style={styles.inputflex}
-                    secureTextEntry={!confirmVisible}
-                    value={confirmPassword}
-                    onChangeText={setConfirmPassword}
-                    placeholder="Confirm new password"
-                />
-                <TouchableOpacity onPress={() => setConfirmVisible(!confirmVisible)}>
-                    <Ionicons
-                        name={confirmVisible ? 'eye-off-outline' : 'eye-outline'}
-                        size={22}
-                        color="#666"
+                {/* New Password */}
+                <Text style={styles.label}>New Password</Text>
+                <View style={styles.passwordContainer}>
+                    <TextInput
+                        style={styles.inputflex}
+                        secureTextEntry={!newVisible}
+                        value={newPassword}
+                        onChangeText={setNewPassword} // 👈 කෙලින්ම ස්ටේට් එකට සෙට් කරා, useMemo එකෙන් ස්ට්‍රෙන්ත් එක බලාගන්නවා
+                        placeholder="Enter new password"
+                        autoCapitalize="none"
+                        autoCorrect={false}
                     />
-                </TouchableOpacity>
-            </View>
+                    <TouchableOpacity onPress={() => setNewVisible(!newVisible)} style={styles.eyeButton}>
+                        <Ionicons
+                            name={newVisible ? 'eye-off-outline' : 'eye-outline'}
+                            size={20}
+                            color="#8e8e93"
+                        />
+                    </TouchableOpacity>
+                </View>
 
-            {/* Submit */}
-            <TouchableOpacity
-                style={[
-                    styles.button,
-                    strength < 3 && { backgroundColor: '#aaa' }
-                ]}
-                onPress={handleChangePassword}
-                disabled={loading || strength < 3}
-            >
-                {loading ? (
-                    <ActivityIndicator color="#fff" />
-                ) : (
-                    <Text style={styles.buttonText}>Update Password</Text>
+                {/* Strength Indicator */}
+                {newPassword.length > 0 && (
+                    <View style={styles.strengthWrapper}>
+                        <View style={styles.strengthBarBackground}>
+                            <View
+                                style={[
+                                    styles.strengthBarActive,
+                                    {
+                                        width: `${strengthStyle.width}%`,
+                                        backgroundColor: strengthStyle.color
+                                    }
+                                ]}
+                            />
+                        </View>
+                        <Text style={[styles.strengthLabel, { color: strengthStyle.color }]}>
+                            {strengthStyle.label}
+                        </Text>
+                    </View>
                 )}
-            </TouchableOpacity>
 
-        </View>
+                {/* Confirm Password */}
+                <Text style={styles.label}>Confirm New Password</Text>
+                <View style={styles.passwordContainer}>
+                    <TextInput
+                        style={styles.inputflex}
+                        secureTextEntry={!confirmVisible}
+                        value={confirmPassword}
+                        onChangeText={setConfirmPassword}
+                        placeholder="Confirm new password"
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                    />
+                    <TouchableOpacity onPress={() => setConfirmVisible(!confirmVisible)} style={styles.eyeButton}>
+                        <Ionicons
+                            name={confirmVisible ? 'eye-off-outline' : 'eye-outline'}
+                            size={20}
+                            color="#8e8e93"
+                        />
+                    </TouchableOpacity>
+                </View>
+
+                {/* Submit */}
+                <TouchableOpacity
+                    style={[
+                        styles.button,
+                        strength < 3 && styles.buttonDisabled
+                    ]}
+                    onPress={handleChangePassword}
+                    disabled={loading || strength < 3}
+                >
+                    {loading ? (
+                        <ActivityIndicator color="#fff" />
+                    ) : (
+                        <Text style={styles.buttonText}>Update Password</Text>
+                    )}
+                </TouchableOpacity>
+
+            </ScrollView>
+        </KeyboardAvoidingView>
     );
 }
 
+/* ================= STYLES ================= */
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -188,55 +209,72 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 14,
-        color: '#666',
-        marginBottom: 8
+        fontWeight: '500',
+        color: '#48484a',
+        marginBottom: 6
     },
     passwordContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#f9f9f9',
+        backgroundColor: '#f2f2f7',
         borderWidth: 1,
-        borderColor: '#eee',
-        borderRadius: 8,
+        borderColor: '#e5e5ea',
+        borderRadius: 10,
         paddingHorizontal: 12,
-        marginBottom: 10
+        marginBottom: 16
     },
     inputflex: {
         flex: 1,
         paddingVertical: 12,
         fontSize: 16,
-        color: '#333'
+        color: '#000'
+    },
+    eyeButton: {
+        padding: 4,
+        justifyContent: 'center',
+        alignItems: 'center'
     },
     strengthWrapper: {
         marginBottom: 20,
-        marginTop: -5
+        marginTop: -6
     },
     strengthBarBackground: {
-        height: 4,
-        backgroundColor: '#E0E0E0',
-        borderRadius: 2,
-        width: '100%'
+        height: 5,
+        backgroundColor: '#e5e5ea',
+        borderRadius: 3,
+        width: '100%',
+        overflow: 'hidden'
     },
     strengthBarActive: {
-        height: 4,
-        borderRadius: 2
+        height: '100%',
+        borderRadius: 3
     },
     strengthLabel: {
         fontSize: 12,
         fontWeight: '600',
-        marginTop: 4,
+        marginTop: 5,
         textAlign: 'right'
     },
     button: {
         backgroundColor: '#3f51b5',
         padding: 15,
-        borderRadius: 10,
+        borderRadius: 12,
         alignItems: 'center',
-        marginTop: 10
+        marginTop: 12,
+        shadowColor: '#3f51b5',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 6,
+        elevation: 3
+    },
+    buttonDisabled: {
+        backgroundColor: '#d1d1d6',
+        shadowOpacity: 0,
+        elevation: 0
     },
     buttonText: {
         color: '#fff',
-        fontWeight: 'bold',
+        fontWeight: '600',
         fontSize: 16
     }
 });

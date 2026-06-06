@@ -1,26 +1,58 @@
-// src/services/userService.js
 import { getAuthToken } from "./authService";
 
-const BASE_URL = "http://169.254.16.170:5000/api/users";
+const BASE_URL = "http://10.168.231.90:5000/api/users";
 
-export const updateProfile = async (name, phone, imageUri) => {
+// -------------------------------------------------------------
+// 📐 TYPES & INTERFACES
+// -------------------------------------------------------------
+export interface ProfileResponse {
+  success: boolean;
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    profile_image?: string;
+  };
+  message?: string;
+}
+
+export interface NotificationSettings {
+  [key: string]: number | boolean | string | undefined;
+  
+}
+
+export interface CommonResponse {
+  success: boolean;
+  message?: string;
+}
+
+// -------------------------------------------------------------
+// 👤 UPDATE PROFILE (WITH IMAGE UPLOAD)
+// -------------------------------------------------------------
+export const updateProfile = async (
+  name: string,
+  phone: string,
+  imageUri?: string | null
+): Promise<ProfileResponse> => {
   try {
     const authToken = await getAuthToken();
     const formData = new FormData();
     formData.append("name", name);
     formData.append("phone", phone);
 
-    // Only attach if there is a new local image selected
+    
     if (imageUri && imageUri.startsWith("file://")) {
       const filename = imageUri.split("/").pop();
       const match = /\.(\w+)$/.exec(filename || "");
       const type = match ? `image/${match[1]}` : `image/jpeg`;
 
+      
       formData.append("profile_image", {
         uri: imageUri,
-        name: filename,
+        name: filename || "profile.jpg",
         type: type,
-      });
+      } as any);
     }
 
     const response = await fetch(`${BASE_URL}/update-profile`, {
@@ -40,9 +72,10 @@ export const updateProfile = async (name, phone, imageUri) => {
   }
 };
 
-// src/services/userService.js
-
-export const getProfile = async () => {
+// -------------------------------------------------------------
+// 🔍 GET PROFILE
+// -------------------------------------------------------------
+export const getProfile = async (): Promise<ProfileResponse> => {
   try {
     const token = await getAuthToken();
     const response = await fetch(`${BASE_URL}/profile`, {
@@ -59,14 +92,18 @@ export const getProfile = async () => {
   }
 };
 
-/**
- * Change Password Service
- */
-export const changePassword = async (oldPassword, newPassword) => {
+// -------------------------------------------------------------
+// 🔒 CHANGE PASSWORD
+// -------------------------------------------------------------
+export const changePassword = async (
+  oldPassword: string,
+  newPassword: string
+): Promise<CommonResponse> => {
   try {
+
     const token = await getAuthToken();
     const response = await fetch(`${BASE_URL}/change-password`, {
-      method: "POST",
+      method: "PUT",
       body: JSON.stringify({ oldPassword, newPassword }),
       headers: {
         "Content-Type": "application/json",
@@ -75,28 +112,15 @@ export const changePassword = async (oldPassword, newPassword) => {
     });
     return await response.json();
   } catch (error) {
+    console.error("Change Password Error:", error);
     throw error;
   }
 };
 
-// Fetch current notification preferences
-// export const getNotificationSettings = async () => {
-//   try {
-//     const token = await getAuthToken();
-//     const response = await fetch(`${BASE_URL}/settings/notifications`, {
-//       method: "GET",
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//         Accept: "application/json",
-//       },
-//     });
-//     return await response.json();
-//   } catch (error) {
-//     throw error;
-//   }
-// };
-
-export const getNotificationSettings = async () => {
+// -------------------------------------------------------------
+// 🔔 GET NOTIFICATION SETTINGS
+// -------------------------------------------------------------
+export const getNotificationSettings = async (): Promise<NotificationSettings> => {
   const token = await getAuthToken();
 
   const response = await fetch(`${BASE_URL}/settings/notifications`, {
@@ -110,7 +134,7 @@ export const getNotificationSettings = async () => {
   const text = await response.text();
   console.log("Raw response:", response.status, text);
 
-  let data;
+  let data: any;
   try {
     data = JSON.parse(text);
   } catch {
@@ -124,8 +148,13 @@ export const getNotificationSettings = async () => {
   return data;
 };
 
-// Update a specific setting
-export const updateNotificationSetting = async (key, value) => {
+// -------------------------------------------------------------
+// ⚙️ UPDATE NOTIFICATION SETTING
+// -------------------------------------------------------------
+export const updateNotificationSetting = async (
+  key: string,
+  value: boolean | number
+): Promise<CommonResponse> => {
   try {
     const token = await getAuthToken();
     const response = await fetch(`${BASE_URL}/settings/notifications`, {
@@ -138,6 +167,7 @@ export const updateNotificationSetting = async (key, value) => {
     });
     return await response.json();
   } catch (error) {
+    console.error("Update Notification Setting Error:", error);
     throw error;
   }
 };

@@ -1,54 +1,69 @@
-import { Stack} from 'expo-router';
+import { Stack } from 'expo-router';
 import React from 'react';
+import { StatusBar } from 'react-native';
+import { UserProvider } from '../src/context/UserContext'; 
 
-// This is the global layout file for the entire app.
 const RootLayout = () => {
   return (
-    <Stack>
-      {/* 1. The index route is the splash/redirect screen */}
-      <Stack.Screen 
-        name="index" 
-        options={{ headerShown: false }} 
-      />
-      
-      {/* 2. The authentication screens (like login) */}
-      <Stack.Screen 
-        name="(auth)/Login" 
-        options={{ headerShown: true , title: 'Login' }} 
-      />
-
-      {/* 3. The registration screen */}
-      <Stack.Screen 
-        name="(auth)/Register" 
-        options={{ headerShown: true , title: 'Register' }} 
-      />
-
-      {/* 4. The forgot password screen */}
-      <Stack.Screen 
-        name="(auth)/frogot-password" 
-        options={{ headerShown: true , title: 'Forgot Password' }} 
-      />
-
-      
-
- {/* 🚀 NEW: The main application group (which uses the Drawer/Sidebar layout) */}
-      <Stack.Screen 
-        name="(app)" // This points to the new app/(app)/_layout.js file
-        options={{ headerShown: false }} // The DrawerLayout will handle its own header
-      />
-    </Stack>
+    <UserProvider>
      
-    
+      <StatusBar barStyle="dark-content" backgroundColor="#f9f9f9" />
+
+      <Stack
+        screenOptions={{
+     
+          headerStyle: {
+            backgroundColor: '#f9f9f9', 
+          },
+          headerShadowVisible: false, 
+          headerTintColor: '#333', 
+          headerTitleAlign: 'center', 
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            fontSize: 18,
+          },
+        }}
+      >
+        {/* 1. Splash/Redirect Screen */}
+        <Stack.Screen 
+          name="index" 
+          options={{ headerShown: false }} 
+        />
+        
+        {/* 2. Login Screen */}
+        <Stack.Screen 
+          name="(auth)/Login" 
+          options={{ 
+            title: 'Login',
+            
+            headerLeft: () => null, 
+          }} 
+        />
+
+        {/* 3. Register Screen */}
+        <Stack.Screen 
+          name="(auth)/Register" 
+          options={{ 
+            title: 'Register',
+          }} 
+        />
+
+        {/* 4. Forgot Password Screen */}
+        <Stack.Screen 
+          name="(auth)/forgot-password" 
+          options={{ 
+            title: 'Forgot Password',
+          }} 
+        />
+
+        {/* 🚀 Main Application Group (Drawer Layout) */}
+        <Stack.Screen 
+          name="(app)" 
+          options={{ headerShown: false }} 
+        />
+      </Stack>
+    </UserProvider>
   );
 };
 
 export default RootLayout;
-
-
-
-
-
-
-
-
-
