@@ -33,7 +33,7 @@ interface SecuredHeaders {
 // -------------------------------------------------------------
 const getSecuredHeaders = async (): Promise<SecuredHeaders> => {
   const token = await getAuthToken();
-  console.log("Retrieved Auth Token:", token);
+  
   if (!token) {
     throw new Error("Authentication required. Please log in.");
   }
@@ -55,7 +55,7 @@ export const getRegisteredVehicles = async (): Promise<Vehicle[]> => {
     });
 
     const data = await response.json();
-    console.log("Vehicles Fetch Status:", response.status);
+    
 
     if (!response.ok) {
       throw new Error(data.message || "Failed to fetch vehicles.");

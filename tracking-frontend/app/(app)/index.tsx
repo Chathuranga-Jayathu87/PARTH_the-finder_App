@@ -56,16 +56,16 @@ export default function AppHome() {
       <View style={styles.header}>
         <View>
           <Text style={styles.welcomeText}>
-            Welcome Back, {user?.name || 'Driver'}! 👋
+            Welcome Back, {user?.name || 'Driver'}!
           </Text>
           <Text style={styles.dateText}>JumboWatch Live Tracking Active</Text>
         </View>
-        <TouchableOpacity 
+        {/* <TouchableOpacity 
           style={styles.profileShortcut} 
           onPress={() => router.push('/(app)/settings')}
         >
           <Ionicons name="person-circle-outline" size={36} color="#3f51b5" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       <Text style={styles.sectionTitle}>Quick Actions</Text>
@@ -154,6 +154,7 @@ const styles = StyleSheet.create({
     fontWeight: '500'
   },
   header: {
+    marginTop: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -164,7 +165,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#edf0f4',
   },
   welcomeText: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#1a1a1a',
   },

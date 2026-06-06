@@ -79,7 +79,7 @@ function DrawerLayout() {
         if (!expoToken) return;
 
         await saveExpoPushToken(expoToken, jwt);
-        console.log("✅ Expo Token registered successfully:", expoToken);
+        console.log("✅ Expo Token registered successfully.");
       } catch (err) {
         console.error("Failed to register Expo Push Token:", err);
       }
@@ -100,7 +100,7 @@ function DrawerLayout() {
           drawerActiveTintColor: '#3f51b5', 
           headerTitleAlign: 'center', 
           headerStyle: {
-            height: isIOS ? 100 : 80, 
+            height: isIOS ? 100 : 100, 
             backgroundColor: '#f9f9f9',
             elevation: 0, 
             borderBottomWidth: 0,

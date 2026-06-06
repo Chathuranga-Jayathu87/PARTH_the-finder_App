@@ -39,7 +39,7 @@ export const saveAuthToken = async (token: string): Promise<void> => {
 export const getAuthToken = async (): Promise<string | null> => {
   try {
     const token = await AsyncStorage.getItem(TOKEN_KEY);
-    console.log("Retrieved Auth Token vgvvyyv:", token);
+    
     return token;
   } catch (error) {
     console.error("AsyncStorage Error: Could not get token", error);

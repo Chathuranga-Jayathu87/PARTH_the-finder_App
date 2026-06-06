@@ -2,8 +2,8 @@
 const BASE_URL = "http://10.168.231.90:5000/api/users";
 
 export const saveExpoPushToken = async (token: string, jwt: string): Promise<void> => {
-  console.log("💾 Saving Expo Push Token to backend:", token);
-  console.log("💾 Using JWT:", jwt);
+ // console.log("💾 Saving Expo Push Token to backend:", token);
+  //console.log("💾 Using JWT:", jwt);
 
   try {
     const response = await fetch(`${BASE_URL}/save-token`, {

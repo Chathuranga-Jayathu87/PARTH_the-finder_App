@@ -48,7 +48,7 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
       })
     ).data;
 
-    console.log("✅ Expo Push Token:", token);
+    //console.log("✅ Expo Push Token:", token);
 
 
     if (Platform.OS === "android") {
