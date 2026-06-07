@@ -1,7 +1,7 @@
 import { getAuthToken } from "./authService";
 
 
-const API_BASE_URL = "http://10.168.231.90:5000/api/vehicles";
+const API_BASE_URL = "https://parth-the-finder-app.onrender.com/api/vehicles";
 
 // -------------------------------------------------------------
 // 📐 TYPES & INTERFACES

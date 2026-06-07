@@ -1,5 +1,5 @@
 
-const BASE_URL = "http://10.168.231.90:5000/api/users";
+const BASE_URL = "https://parth-the-finder-app.onrender.com/api/users";
 
 export const saveExpoPushToken = async (token: string, jwt: string): Promise<void> => {
  // console.log("💾 Saving Expo Push Token to backend:", token);

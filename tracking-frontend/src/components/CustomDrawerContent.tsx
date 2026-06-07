@@ -14,7 +14,7 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
   const { user, setUser } = useUser();
 
   const profileImageUrl = user?.profile_image
-    ? `http://10.168.231.90:5000${user.profile_image}?t=${new Date().getTime()}`
+    ? `https://parth-the-finder-app.onrender.com${user.profile_image}?t=${new Date().getTime()}`
     : "https://i.pravatar.cc/150?img=12";
 
   const handleLogout = async () => {

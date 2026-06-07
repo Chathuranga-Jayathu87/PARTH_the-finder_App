@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
-const API_BASE_URL = "http://10.168.231.90:5000/api/auth"; 
+const API_BASE_URL = "https://parth-the-finder-app.onrender.com/api/auth"; 
 const TOKEN_KEY = "authToken";
 
 // -------------------------------------------------------------

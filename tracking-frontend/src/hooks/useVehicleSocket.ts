@@ -3,7 +3,7 @@ import { io, Socket } from "socket.io-client";
 import { getAuthToken } from "../services/authService";
 
 
-const SOCKET_URL = "http://10.168.231.90:5000";
+const SOCKET_URL = "https://parth-the-finder-app.onrender.com";
 
 export interface LiveVehicleData {
   speed?: number;
